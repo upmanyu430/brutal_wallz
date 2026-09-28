@@ -38,7 +38,7 @@ void main() {
 
       expect(model.id, 'abc123');
       expect(model.title, 'Wallhaven - abc123');
-      final validCategories = ['Abstract', 'Minimal', 'Geometry', 'Space', 'Nature'];
+      final validCategories = ['general', 'anime', 'people'];
       expect(validCategories.contains(model.cat), isTrue);
       expect(model.imageUrl, 'https://w.wallhaven.cc/full/ab/wallhaven-abc123.jpg');
       expect(model.thumbnailUrl, 'https://th.wallhaven.cc/lg/ab/abc123.jpg');

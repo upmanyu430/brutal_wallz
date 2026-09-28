@@ -36,12 +36,16 @@ class AppState extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final dio = Dio();
+      final dio = Dio(BaseOptions(
+        connectTimeout: const Duration(seconds: 10),
+        receiveTimeout: const Duration(seconds: 10),
+      ));
       final response = await dio.get('https://wallhaven.cc/api/v1/search?sorting=random');
       
       final List<dynamic> data = response.data['data'];
       wallpapers = data.map((json) => WallpaperModel.fromJson(json)).toList();
     } catch (e) {
+      debugPrint('Error fetching wallpapers: $e');
       error = "FAILED TO FETCH WALLS!";
     } finally {
       isLoading = false;

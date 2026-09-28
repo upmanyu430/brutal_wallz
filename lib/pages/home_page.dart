@@ -245,9 +245,9 @@ class _HomePageState extends State<HomePage> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           _buildCategoryBtn('All', yellow, Icons.local_fire_department),
-          _buildCategoryBtn('Abstract', Colors.white, Icons.category),
-          _buildCategoryBtn('Minimal', Colors.white, Icons.water_drop),
-          _buildCategoryBtn('Geometry', pink, Icons.view_in_ar),
+          _buildCategoryBtn('General', Colors.white, Icons.wallpaper),
+          _buildCategoryBtn('Anime', Colors.white, Icons.animation),
+          _buildCategoryBtn('People', pink, Icons.people),
         ],
       ),
     );
