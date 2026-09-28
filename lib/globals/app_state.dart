@@ -1,9 +1,10 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:brutal_wallz/globals/themes.dart';
 import 'package:brutal_wallz/models/wallpaper_model.dart';
 import 'package:nowa_runtime/nowa_runtime.dart';
 import 'package:provider/provider.dart';
-import 'package:dio/dio.dart';
 
 @NowaGenerated()
 class AppState extends ChangeNotifier {
@@ -36,14 +37,11 @@ class AppState extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final dio = Dio(BaseOptions(
-        connectTimeout: const Duration(seconds: 10),
-        receiveTimeout: const Duration(seconds: 10),
-      ));
-      final response = await dio.get('https://wallhaven.cc/api/v1/search?sorting=random');
-      
-      final List<dynamic> data = response.data['data'];
-      wallpapers = data.map((json) => WallpaperModel.fromJson(json)).toList();
+      final jsonString = await rootBundle.loadString('assets/wallpapers.json');
+      final List<dynamic> data = jsonDecode(jsonString) as List<dynamic>;
+      wallpapers = data
+          .map((json) => WallpaperModel.fromJson(json as Map<String, dynamic>))
+          .toList();
     } catch (e) {
       debugPrint('Error fetching wallpapers: $e');
       error = "FAILED TO FETCH WALLS!";

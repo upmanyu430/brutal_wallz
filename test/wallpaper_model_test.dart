@@ -4,6 +4,27 @@ import 'package:brutal_wallz/globals/app_state.dart';
 
 void main() {
   group('WallpaperModel', () {
+    test('fromJson correctly parses bundled wallpapers.json format', () {
+      final json = {
+        'id': 'pokzv3',
+        'title': 'Wallhaven - pokzv3',
+        'category': 'general',
+        'imagePath': 'assets/wallpapers/pokzv3.jpg',
+        'thumbnailPath': 'assets/wallpapers/pokzv3.jpg',
+      };
+
+      final model = WallpaperModel.fromJson(json);
+
+      expect(model.id, 'pokzv3');
+      expect(model.title, 'Wallhaven - pokzv3');
+      expect(model.cat, 'general');
+      expect(model.category, 'general');
+      expect(model.imageUrl, 'assets/wallpapers/pokzv3.jpg');
+      expect(model.imagePath, 'assets/wallpapers/pokzv3.jpg');
+      expect(model.thumbnailUrl, 'assets/wallpapers/pokzv3.jpg');
+      expect(model.thumbnailPath, 'assets/wallpapers/pokzv3.jpg');
+    });
+
     test('fromJson correctly parses Wallhaven response with category', () {
       final json = {
         'id': '9m9x9w',
@@ -49,8 +70,8 @@ void main() {
         id: '123',
         title: 'Wallhaven - 123',
         cat: 'Space',
-        imageUrl: 'https://example.com/image.jpg',
-        thumbnailUrl: 'https://example.com/thumb.jpg',
+        imageUrl: 'assets/wallpapers/123.jpg',
+        thumbnailUrl: 'assets/wallpapers/123.jpg',
       );
 
       final json = model.toJson();
@@ -58,9 +79,9 @@ void main() {
       expect(json, {
         'id': '123',
         'title': 'Wallhaven - 123',
-        'cat': 'Space',
-        'imageUrl': 'https://example.com/image.jpg',
-        'thumbnailUrl': 'https://example.com/thumb.jpg',
+        'category': 'Space',
+        'imagePath': 'assets/wallpapers/123.jpg',
+        'thumbnailPath': 'assets/wallpapers/123.jpg',
       });
     });
   });

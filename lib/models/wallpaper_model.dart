@@ -13,13 +13,28 @@ class WallpaperModel {
   factory WallpaperModel.fromJson(Map<String, dynamic> json) {
     final id = json['id'].toString();
     final categories = ['general', 'anime', 'people'];
-    
+    final category = json['category']?.toString() ??
+        json['cat']?.toString() ??
+        categories[id.hashCode % categories.length];
+
+    final image = json['imagePath']?.toString() ??
+        json['path']?.toString() ??
+        json['imageUrl']?.toString() ??
+        '';
+
+    final thumb = json['thumbnailPath']?.toString() ??
+        (json['thumbs'] is Map<String, dynamic>
+            ? (json['thumbs'] as Map<String, dynamic>)['large']?.toString()
+            : null) ??
+        json['thumbnailUrl']?.toString() ??
+        image;
+
     return WallpaperModel(
       id: id,
-      title: 'Wallhaven - $id',
-      cat: json['category']?.toString() ?? categories[id.hashCode % categories.length],
-      imageUrl: json['path'] as String,
-      thumbnailUrl: (json['thumbs'] as Map<String, dynamic>?)?['large'] as String? ?? '',
+      title: json['title']?.toString() ?? 'Wallhaven - $id',
+      cat: category,
+      imageUrl: image,
+      thumbnailUrl: thumb,
     );
   }
 
@@ -29,13 +44,17 @@ class WallpaperModel {
   final String imageUrl;
   final String thumbnailUrl;
 
+  String get category => cat;
+  String get imagePath => imageUrl;
+  String get thumbnailPath => thumbnailUrl;
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'title': title,
-      'cat': cat,
-      'imageUrl': imageUrl,
-      'thumbnailUrl': thumbnailUrl,
+      'category': cat,
+      'imagePath': imageUrl,
+      'thumbnailPath': thumbnailUrl,
     };
   }
 }
