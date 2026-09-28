@@ -317,8 +317,9 @@ class _HomePageState extends State<HomePage> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Image.network(
+            Image.asset(
               list[index].thumbnailUrl,
+              cacheWidth: 300,
               fit: BoxFit.cover,
               errorBuilder: (c, o, s) => const Icon(Icons.broken_image, size: 50),
             ),
@@ -362,7 +363,7 @@ class _HomePageState extends State<HomePage> {
         decoration: BoxDecoration(
           color: Colors.black,
           image: DecorationImage(
-            image: NetworkImage(wall.imageUrl),
+            image: AssetImage(wall.imageUrl),
             fit: BoxFit.cover,
           ),
         ),
