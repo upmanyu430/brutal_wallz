@@ -16,10 +16,10 @@ class WallpaperModel {
     
     return WallpaperModel(
       id: id,
-      title: json['author'] as String,
-      cat: categories[int.parse(id) % categories.length],
-      imageUrl: json['download_url'] as String,
-      thumbnailUrl: 'https://picsum.photos/id/$id/400/600',
+      title: 'Wallhaven - $id',
+      cat: json['category']?.toString() ?? categories[id.hashCode % categories.length],
+      imageUrl: json['path'] as String,
+      thumbnailUrl: json['thumbs']['large'] as String,
     );
   }
 
