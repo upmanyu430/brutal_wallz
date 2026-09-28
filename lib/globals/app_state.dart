@@ -37,9 +37,9 @@ class AppState extends ChangeNotifier {
 
     try {
       final dio = Dio();
-      final response = await dio.get('https://picsum.photos/v2/list?page=1&limit=30');
+      final response = await dio.get('https://wallhaven.cc/api/v1/search?sorting=random');
       
-      final List<dynamic> data = response.data;
+      final List<dynamic> data = response.data['data'];
       wallpapers = data.map((json) => WallpaperModel.fromJson(json)).toList();
     } catch (e) {
       error = "FAILED TO FETCH WALLS!";
