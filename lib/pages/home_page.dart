@@ -323,28 +323,6 @@ class _HomePageState extends State<HomePage> {
               fit: BoxFit.cover,
               errorBuilder: (c, o, s) => const Icon(Icons.broken_image, size: 50),
             ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Container(
-                  width: double.infinity,
-                  margin: const EdgeInsets.all(8),
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(color: Colors.black, width: 2),
-                  ),
-                  child: Text(
-                    list[index].title.split(' ').take(2).join(' ').toUpperCase(),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              ],
-            ),
           ],
         ),
       ),
