@@ -12,14 +12,14 @@ class WallpaperModel {
 
   factory WallpaperModel.fromJson(Map<String, dynamic> json) {
     final id = json['id'].toString();
-    final categories = ['Abstract', 'Minimal', 'Geometry', 'Space', 'Nature'];
+    final categories = ['general', 'anime', 'people'];
     
     return WallpaperModel(
       id: id,
       title: 'Wallhaven - $id',
       cat: json['category']?.toString() ?? categories[id.hashCode % categories.length],
       imageUrl: json['path'] as String,
-      thumbnailUrl: json['thumbs']['large'] as String,
+      thumbnailUrl: (json['thumbs'] as Map<String, dynamic>?)?['large'] as String? ?? '',
     );
   }
 
