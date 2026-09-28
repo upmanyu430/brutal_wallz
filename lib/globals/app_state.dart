@@ -29,7 +29,7 @@ class AppState extends ChangeNotifier {
   String? error;
 
   Future<void> fetchWallpapers() async {
-    if (wallpapers.isNotEmpty) return; // Already fetched
+    if (wallpapers.isNotEmpty || isLoading) return; // Already fetched
 
     isLoading = true;
     error = null;
