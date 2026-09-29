@@ -55,6 +55,8 @@ void main() {
 
     // Verify modal content is displayed with SET AS WALLPAPER button
     expect(find.text('SET AS WALLPAPER'), findsOneWidget);
+    // Verify modal does not display the wallpaper title label
+    expect(find.text(appState.wallpapers.first.title.toUpperCase()), findsNothing);
 
     // 3. Verify Modal Container has DecorationImage with AssetImage
     final modalImageFinder = find.byWidgetPredicate((widget) {
