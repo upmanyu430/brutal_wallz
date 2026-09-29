@@ -3,6 +3,10 @@ import 'package:brutal_wallz/models/wallpaper_model.dart';
 import 'package:brutal_wallz/globals/app_state.dart';
 import 'package:nowa_runtime/nowa_runtime.dart';
 import 'package:brutal_wallz/components/brutal_button.dart';
+
+/// Main screen of the Brutal Wallz application.
+/// Houses the wallpaper gallery, interactive search, favorites collection,
+/// settings dashboard, full-screen preview modal, and toast feedback alerts.
 @NowaGenerated()
 class HomePage extends StatefulWidget {
   @NowaGenerated({'loader': 'auto-constructor'})
@@ -16,30 +20,46 @@ class HomePage extends StatefulWidget {
 
 @NowaGenerated()
 class _HomePageState extends State<HomePage> {
+  // ─── Neo-brutalist Brand Color Palette ──────────────────────────────────────
+  /// Off-white paper background tone
   final Color bg = const Color(0xFFF4F0E6);
 
+  /// Vibrant yellow accent color
   final Color yellow = const Color(0xFFFDE047);
 
+  /// Bright pink accent color (favorites & warnings)
   final Color pink = const Color(0xFFF9A8D4);
 
+  /// Electric pastel blue accent color
   final Color blue = const Color(0xFF93C5FD);
 
+  /// Neon green accent color (success & primary actions)
   final Color green = const Color(0xFF86EFAC);
 
+  /// Warm orange accent color
   final Color orange = const Color(0xFFFDBA74);
 
+  // ─── UI Overlay States ──────────────────────────────────────────────────────
+  /// Controls the visibility of the slide-up full-screen wallpaper detail modal
   bool isModalOpen = false;
 
+  /// Controls the slide-down animated toast banner visibility
   bool isToastVisible = false;
 
+  /// Current active bottom navigation tab index (0: Explore, 1: Favorites, 2: Settings)
   int _currentIndex = 0;
 
+  /// Current search filter query entered by the user
   String _searchQuery = '';
 
+  /// The wallpaper currently inspected inside the modal preview
   WallpaperModel? selectedWallpaper;
 
+  /// In-memory collection of wallpapers marked as favorite by the user
   List<WallpaperModel> favorites = [];
 
+  /// Returns wallpaper models matching the current [_searchQuery] filter
+  /// by checking both the wallpaper title and category.
   List<WallpaperModel> get filteredWallpapers {
     final appState = AppState.of(context);
     return appState.wallpapers.where((wall) {
@@ -54,17 +74,22 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    // Trigger wallpaper asset fetching after the initial widget frame is rendered
     WidgetsBinding.instance.addPostFrameCallback((_) {
       AppState.of(context, listen: false).fetchWallpapers();
     });
   }
 
+  /// User preference toggle for push notifications
   bool notificationsEnabled = true;
 
+  /// Simulated cached asset storage size in megabytes
   double cacheSizeMb = 14.8;
 
+  /// Text displayed inside the animated toast banner
   String toastMessage = 'WALLPAPER APPLIED!';
 
+  /// Opens the full-screen preview modal displaying the given [wall].
   void openWallpaper(WallpaperModel wall) {
     setState(() {
       selectedWallpaper = wall;
@@ -82,8 +107,13 @@ class _HomePageState extends State<HomePage> {
         child: Stack(
           fit: StackFit.expand,
           children: [
+            // Active tab page content (Gallery, Favorites, or Settings)
             _buildCurrentPage(),
+
+            // Persistent bottom navigation bar
             Positioned(bottom: 0, left: 0, right: 0, child: _buildBottomNav()),
+
+            // Animated full-screen wallpaper inspection modal
             AnimatedPositioned(
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeInOutCubic,
@@ -93,6 +123,8 @@ class _HomePageState extends State<HomePage> {
               right: 0,
               child: _buildModal(),
             ),
+
+            // Top notification banner / toast with spring ease animation
             AnimatedPositioned(
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeOutBack,
@@ -127,9 +159,11 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  /// Builds the top-level view corresponding to the currently selected bottom nav tab.
   Widget _buildCurrentPage() {
     switch (_currentIndex) {
       case 0:
+        // Tab 0: Wallpaper Gallery with Search Header
         return Column(
           children: [
             _buildHeader(),
@@ -137,6 +171,7 @@ class _HomePageState extends State<HomePage> {
           ],
         );
       case 1:
+        // Tab 1: Saved Favorites Collection
         return Column(
           children: [
             Container(
@@ -168,12 +203,14 @@ class _HomePageState extends State<HomePage> {
           ],
         );
       case 2:
+        // Tab 2: User Settings Dashboard
         return _buildSettingsPage();
       default:
         return const SizedBox();
     }
   }
 
+  /// Builds the neo-brutalist header container featuring an interactive search input.
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -211,6 +248,7 @@ class _HomePageState extends State<HomePage> {
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
+            // Show clear button when query is present; otherwise show decorative filter tune icon
             if (_searchQuery.isNotEmpty)
               GestureDetector(
                 onTap: () {
@@ -228,13 +266,19 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  /// Builds the 2-column scrollable grid of wallpaper cards.
+  /// Handles loading indicators, error feedback, and empty result placeholders.
   Widget _buildWallpaperGrid(List<WallpaperModel> list) {
     final appState = AppState.of(context);
+
+    // Show spinner if wallpapers are still being fetched from asset bundle
     if (appState.isLoading) {
       return const Center(
         child: CircularProgressIndicator(color: Colors.black),
       );
     }
+
+    // Display error message if asset loading failed
     if (appState.error != null) {
       return Center(
         child: Text(
@@ -243,6 +287,8 @@ class _HomePageState extends State<HomePage> {
         ),
       );
     }
+
+    // Empty state when filter yields no matches
     if (list.isEmpty) {
       return const Center(
         child: Text(
@@ -251,9 +297,11 @@ class _HomePageState extends State<HomePage> {
         ),
       );
     }
+
+    // Responsive 2-column grid with 9:16 portrait aspect ratio
     return GridView.builder(
       padding: const EdgeInsets.only(left: 24, right: 24, top: 24, bottom: 100),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         crossAxisSpacing: 24,
         mainAxisSpacing: 24,
@@ -267,6 +315,7 @@ class _HomePageState extends State<HomePage> {
         child: Stack(
           fit: StackFit.expand,
           children: [
+            // Downsampled thumbnail image rendering to conserve memory in grid view
             Image.asset(
               list[index].thumbnailUrl,
               cacheWidth: 300,
@@ -279,12 +328,14 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  /// Builds the full-screen slide-over modal inspect window for the selected wallpaper.
   Widget _buildModal() {
     if (selectedWallpaper == null) {
       return const SizedBox();
     }
     final wall = selectedWallpaper!;
     final isFav = favorites.any((f) => f.id == wall.id);
+
     return Material(
       color: Colors.black,
       child: Container(
@@ -297,6 +348,7 @@ class _HomePageState extends State<HomePage> {
         ),
         child: Column(
           children: [
+            // Top action bar with Back and Favorite toggle buttons
             Padding(
               padding: const EdgeInsets.all(24),
               child: Row(
@@ -328,6 +380,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             const Spacer(),
+            // Bottom sheet card with wallpaper title, category chip, and apply action
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(24),
@@ -386,12 +439,14 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  /// Closes the currently opened wallpaper modal and slides it off-screen.
   void closeWallpaper() {
     setState(() {
       isModalOpen = false;
     });
   }
 
+  /// Adds or removes [wall] from the [favorites] list.
   void toggleFavorite(WallpaperModel wall) {
     final isAlreadyFav = favorites.any((f) => f.id == wall.id);
     setState(() {
@@ -403,11 +458,13 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  /// Displays the temporary toast notification banner with a specified [message].
   void showToast(String message) {
     setState(() {
       toastMessage = message;
       isToastVisible = true;
     });
+    // Auto-dismiss the toast banner after 2 seconds
     Future<void>.delayed(const Duration(seconds: 2), () {
       if (mounted) {
         setState(() => isToastVisible = false);
@@ -415,10 +472,12 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  /// Simulates applying the selected wallpaper to the device home/lock screen.
   void setWallpaper() {
     showToast('WALLPAPER APPLIED!');
   }
 
+  /// Opens the About dialog presenting version details and aesthetic info.
   void _showAboutDialog() {
     showDialog<void>(
       context: context,
@@ -504,6 +563,8 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  /// Builds the Settings page containing notifications, cache management,
+  /// favorites reset, and about dialog triggers.
   Widget _buildSettingsPage() {
     return SingleChildScrollView(
       padding: const EdgeInsets.only(left: 24, right: 24, top: 24, bottom: 120),
@@ -515,6 +576,7 @@ class _HomePageState extends State<HomePage> {
             'SETTINGS',
             style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900),
           ),
+          // Notifications preference toggle row
           BrutalButton(
             color: Colors.white,
             shadowOffset: 4,
@@ -563,6 +625,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
+          // Storage and cache details action row
           BrutalButton(
             color: Colors.white,
             shadowOffset: 4,
@@ -586,6 +649,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
+          // Clear favorites action row
           BrutalButton(
             color: Colors.white,
             shadowOffset: 4,
@@ -612,6 +676,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
+          // About application action row
           BrutalButton(
             color: orange,
             shadowOffset: 4,
@@ -637,6 +702,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  /// Displays confirmation dialog to empty all wallpapers from the user's favorites list.
   void _showClearFavoritesDialog() {
     showDialog<void>(
       context: context,
@@ -732,6 +798,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  /// Displays storage management dialog with option to clear cached data.
   void _showStorageDialog() {
     showDialog<void>(
       context: context,
@@ -830,6 +897,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  /// Builds the persistent neo-brutalist bottom navigation bar container.
   Widget _buildBottomNav() {
     return Container(
       color: Colors.black,
@@ -849,6 +917,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  /// Builds an individual tab button in the bottom navigation bar.
   Widget _buildNavTab(IconData icon, Color color, int index) {
     final isSelected = _currentIndex == index;
     return Expanded(
@@ -856,6 +925,7 @@ class _HomePageState extends State<HomePage> {
         color: color,
         shadowOffset: 4,
         borderWidth: 2.0,
+        // Active visual state is pressed into shadow when unselected, popping out when selected
         isActive: !isSelected,
         onTap: () {
           setState(() {

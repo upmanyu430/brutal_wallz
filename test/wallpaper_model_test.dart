@@ -2,11 +2,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:brutal_wallz/models/wallpaper_model.dart';
 import 'package:brutal_wallz/globals/app_state.dart';
 
+/// Unit tests for [WallpaperModel] serialization and [AppState] initialization.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('WallpaperModel', () {
     test('fromJson correctly parses bundled wallpapers.json format', () {
+      // Sample JSON fixture mimicking bundled offline assets
       final json = {
         'id': 'pokzv3',
         'title': 'Wallhaven - pokzv3',
@@ -17,6 +19,7 @@ void main() {
 
       final model = WallpaperModel.fromJson(json);
 
+      // Verify deserialized field mappings and getters
       expect(model.id, 'pokzv3');
       expect(model.title, 'Wallhaven - pokzv3');
       expect(model.cat, 'general');
@@ -28,6 +31,7 @@ void main() {
     });
 
     test('fromJson correctly parses Wallhaven response with category', () {
+      // Sample JSON fixture mimicking remote Wallhaven API payload
       final json = {
         'id': '9m9x9w',
         'category': 'anime',
@@ -49,6 +53,7 @@ void main() {
     });
 
     test('fromJson falls back to category list when category is null', () {
+      // Fixture with omitted category field
       final json = {
         'id': 'abc123',
         'path': 'https://w.wallhaven.cc/full/ab/wallhaven-abc123.jpg',
@@ -61,6 +66,7 @@ void main() {
 
       expect(model.id, 'abc123');
       expect(model.title, 'Wallhaven - abc123');
+      // Confirm that fallback assigns a valid category option
       final validCategories = ['general', 'anime', 'people'];
       expect(validCategories.contains(model.cat), isTrue);
       expect(model.imageUrl, 'https://w.wallhaven.cc/full/ab/wallhaven-abc123.jpg');
@@ -68,6 +74,7 @@ void main() {
     });
 
     test('toJson generates correct map', () {
+      // Model instance
       const model = WallpaperModel(
         id: '123',
         title: 'Wallhaven - 123',
@@ -78,6 +85,7 @@ void main() {
 
       final json = model.toJson();
 
+      // Ensure JSON keys match expected output schema
       expect(json, {
         'id': '123',
         'title': 'Wallhaven - 123',
@@ -91,6 +99,7 @@ void main() {
   group('AppState', () {
     test('initial state has empty wallpapers and false loading', () {
       final appState = AppState();
+      // Verify initial default property values
       expect(appState.wallpapers, isEmpty);
       expect(appState.isLoading, isFalse);
       expect(appState.error, isNull);

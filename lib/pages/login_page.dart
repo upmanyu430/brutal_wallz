@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:brutal_wallz/components/brutal_button.dart';
 
+/// Entry screen allowing users to explore as a guest, sign in with OAuth providers,
+/// or create a new Brutal Wallz account.
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -18,40 +20,55 @@ class _LoginPageState extends State<LoginPage> {
   static const Color green = Color(0xFF86EFAC);
   static const Color orange = Color(0xFFFDBA74);
 
-  // ─── Create-account form state ───────────────────────────────────────────────
+  // ─── Create-account form state & controllers ────────────────────────────────
+  /// Toggles between the landing screen (`false`) and the account creation form (`true`)
   bool _showCreateForm = false;
+
+  /// Controller for user full name input
   final _nameController = TextEditingController();
+
+  /// Controller for user email input
   final _emailController = TextEditingController();
+
+  /// Controller for user password input
   final _passwordController = TextEditingController();
+
+  /// Toggles password text visibility
   bool _obscurePassword = true;
 
   @override
   void dispose() {
+    // Clean up text editing controllers to release resources
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
-  // ─── Helpers ─────────────────────────────────────────────────────────────────
+  // ─── Navigation & Action Handlers ───────────────────────────────────────────
 
+  /// Navigates user into the application flow starting from the animated loading screen.
   void _navigateHome() => context.go('/loading-page');
 
+  /// Handles user tapping the Google Sign-In button.
   void _onGoogleTap() {
-    // TODO: wire up google_sign_in
+    // TODO: Wire up google_sign_in package integration
     _navigateHome();
   }
 
+  /// Handles user tapping the GitHub OAuth button.
   void _onGitHubTap() {
-    // TODO: wire up GitHub OAuth
+    // TODO: Wire up GitHub OAuth provider
     _navigateHome();
   }
 
+  /// Validates input fields and triggers account creation.
   void _onCreateAccount() {
     final name = _nameController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text;
 
+    // Validate that no fields are left empty
     if (name.isEmpty || email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -64,7 +81,8 @@ class _LoginPageState extends State<LoginPage> {
       );
       return;
     }
-    // TODO: wire up real auth
+
+    // TODO: Wire up authentication backend (e.g. Supabase / Firebase / Auth0)
     _navigateHome();
   }
 
@@ -75,6 +93,7 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       backgroundColor: bg,
       body: SafeArea(
+        // Smooth slide transition between the landing screen and the create-account form
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),
           transitionBuilder: (child, anim) =>
@@ -93,6 +112,7 @@ class _LoginPageState extends State<LoginPage> {
 
   // ─── Landing screen ──────────────────────────────────────────────────────────
 
+  /// Builds the initial landing page with branding, social sign-in options, and skip button.
   Widget _buildLanding() {
     return SingleChildScrollView(
       key: const ValueKey('landing'),
@@ -100,7 +120,7 @@ class _LoginPageState extends State<LoginPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Skip button ────────────────────────────────────────────────────────
+          // Skip button to bypass authentication and jump straight into the app
           Align(
             alignment: Alignment.topRight,
             child: GestureDetector(
@@ -124,7 +144,7 @@ class _LoginPageState extends State<LoginPage> {
 
           const SizedBox(height: 36),
 
-          // Hero badge ─────────────────────────────────────────────────────────
+          // Top aesthetic tag badge
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
@@ -142,7 +162,7 @@ class _LoginPageState extends State<LoginPage> {
 
           const SizedBox(height: 16),
 
-          // App title ──────────────────────────────────────────────────────────
+          // Bold title typography
           const Text(
             'BRUTAL\nWALLZ.',
             style: TextStyle(
@@ -155,6 +175,7 @@ class _LoginPageState extends State<LoginPage> {
 
           const SizedBox(height: 12),
 
+          // Value proposition description box
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
@@ -172,7 +193,7 @@ class _LoginPageState extends State<LoginPage> {
 
           const SizedBox(height: 36),
 
-          // OAuth buttons ──────────────────────────────────────────────────────
+          // Google OAuth action button
           _SocialButton(
             label: 'CONTINUE WITH GOOGLE',
             color: Colors.white,
@@ -183,18 +204,19 @@ class _LoginPageState extends State<LoginPage> {
 
           const SizedBox(height: 16),
 
+          // GitHub OAuth action button
           _SocialButton(
             label: 'CONTINUE WITH GITHUB',
             color: Colors.black,
             labelColor: Colors.white,
             shadowOffset: 5,
-            icon: _GitHubIcon(color: Colors.white),
+            icon: const _GitHubIcon(color: Colors.white),
             onTap: _onGitHubTap,
           ),
 
           const SizedBox(height: 24),
 
-          // Divider ────────────────────────────────────────────────────────────
+          // Visual text divider
           Row(
             children: const [
               Expanded(child: Divider(color: Colors.black, thickness: 2)),
@@ -211,7 +233,7 @@ class _LoginPageState extends State<LoginPage> {
 
           const SizedBox(height: 24),
 
-          // Create account button ───────────────────────────────────────────────
+          // Button to switch to create account form
           SizedBox(
             width: double.infinity,
             height: 58,
@@ -230,7 +252,7 @@ class _LoginPageState extends State<LoginPage> {
 
           const SizedBox(height: 28),
 
-          // Footer note ────────────────────────────────────────────────────────
+          // Legal disclaimer and terms notice
           const Center(
             child: Text(
               'By continuing you agree to our Terms & Privacy Policy.',
@@ -249,6 +271,7 @@ class _LoginPageState extends State<LoginPage> {
 
   // ─── Create-account form ─────────────────────────────────────────────────────
 
+  /// Builds the account registration form with name, email, and password input fields.
   Widget _buildCreateForm() {
     return SingleChildScrollView(
       key: const ValueKey('create'),
@@ -256,7 +279,7 @@ class _LoginPageState extends State<LoginPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Back + Skip row ────────────────────────────────────────────────────
+          // Navigation controls: Back to landing or Skip to app
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -299,6 +322,7 @@ class _LoginPageState extends State<LoginPage> {
 
           const SizedBox(height: 36),
 
+          // Header badge
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
@@ -316,6 +340,7 @@ class _LoginPageState extends State<LoginPage> {
 
           const SizedBox(height: 16),
 
+          // Form title
           const Text(
             'JOIN\nBRUTAL.',
             style: TextStyle(
@@ -328,7 +353,7 @@ class _LoginPageState extends State<LoginPage> {
 
           const SizedBox(height: 32),
 
-          // Name field ─────────────────────────────────────────────────────────
+          // Name input field
           _BrutalTextField(
             controller: _nameController,
             label: 'YOUR NAME',
@@ -338,7 +363,7 @@ class _LoginPageState extends State<LoginPage> {
 
           const SizedBox(height: 16),
 
-          // Email field ────────────────────────────────────────────────────────
+          // Email input field
           _BrutalTextField(
             controller: _emailController,
             label: 'EMAIL',
@@ -349,7 +374,7 @@ class _LoginPageState extends State<LoginPage> {
 
           const SizedBox(height: 16),
 
-          // Password field ─────────────────────────────────────────────────────
+          // Password input field with visibility toggle
           _BrutalTextField(
             controller: _passwordController,
             label: 'PASSWORD',
@@ -367,7 +392,7 @@ class _LoginPageState extends State<LoginPage> {
 
           const SizedBox(height: 32),
 
-          // Submit button ──────────────────────────────────────────────────────
+          // Form submission button
           SizedBox(
             width: double.infinity,
             height: 60,
@@ -386,7 +411,7 @@ class _LoginPageState extends State<LoginPage> {
 
           const SizedBox(height: 20),
 
-          // Already have account ───────────────────────────────────────────────
+          // Return to sign in option
           Center(
             child: GestureDetector(
               onTap: () => setState(() => _showCreateForm = false),
@@ -407,6 +432,7 @@ class _LoginPageState extends State<LoginPage> {
 
           const SizedBox(height: 28),
 
+          // Terms notice
           const Center(
             child: Text(
               'By creating an account you agree to our Terms & Privacy Policy.',
@@ -426,7 +452,7 @@ class _LoginPageState extends State<LoginPage> {
 
 // ─── Reusable widgets ─────────────────────────────────────────────────────────
 
-/// A brutal-styled text field with a thick border and box shadow.
+/// A neo-brutalist styled text field with a thick black border and hard drop shadow.
 class _BrutalTextField extends StatelessWidget {
   const _BrutalTextField({
     required this.controller,
@@ -438,12 +464,25 @@ class _BrutalTextField extends StatelessWidget {
     this.suffixIcon,
   });
 
+  /// Text controller managing the field's input value.
   final TextEditingController controller;
+
+  /// Top label describing the required input.
   final String label;
+
+  /// Hint text rendered when the field is empty.
   final String hint;
+
+  /// Icon positioned at the start of the text input.
   final IconData prefixIcon;
+
+  /// Whether the input text should be hidden (for passwords).
   final bool obscureText;
+
+  /// Keyboard input type (e.g. email, number, plain text).
   final TextInputType? keyboardType;
+
+  /// Optional widget displayed at the end of the text field (e.g. visibility icon).
   final Widget? suffixIcon;
 
   @override
@@ -490,7 +529,7 @@ class _BrutalTextField extends StatelessWidget {
   }
 }
 
-/// OAuth / social login button with a brutal press effect.
+/// OAuth / social login button with neo-brutalist press effect.
 class _SocialButton extends StatelessWidget {
   const _SocialButton({
     required this.label,
@@ -501,11 +540,22 @@ class _SocialButton extends StatelessWidget {
     this.labelColor = Colors.black,
   });
 
+  /// The button text label.
   final String label;
+
+  /// Background color of the button.
   final Color color;
+
+  /// Text color of the button label.
   final Color labelColor;
+
+  /// Icon widget rendered at the leading side of the button.
   final Widget icon;
+
+  /// Callback executed when the button is tapped.
   final VoidCallback onTap;
+
+  /// Drop shadow offset distance.
   final double shadowOffset;
 
   @override
@@ -541,9 +591,9 @@ class _SocialButton extends StatelessWidget {
   }
 }
 
-// ─── SVG-free icon widgets ────────────────────────────────────────────────────
+// ─── SVG-free Icon Widgets (Vector Canvas Painters) ───────────────────────────
 
-/// Hand-drawn Google "G" using a CustomPainter (no SVG dependency needed).
+/// Hand-drawn Google "G" logo rendered using a [CustomPainter] without external SVG dependencies.
 class _GoogleIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -551,6 +601,7 @@ class _GoogleIcon extends StatelessWidget {
   }
 }
 
+/// [CustomPainter] that draws the four distinct colored arcs and horizontal crossbar of the Google logo.
 class _GooglePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -558,22 +609,22 @@ class _GooglePainter extends CustomPainter {
     final cy = size.height / 2;
     final r = size.width * 0.44;
 
-    // Ring
+    // Stroke paint configuration for the logo ring arcs
     final ringPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = size.width * 0.13;
 
-    // Blue arc (top → right)
+    // Blue arc (top-right quadrant)
     ringPaint.color = const Color(0xFF4285F4);
     canvas.drawArc(
       Rect.fromCircle(center: Offset(cx, cy), radius: r),
-      -1.57, // -90°
-      1.57,  //  90°
+      -1.57, // -90 degrees
+      1.57,  //  90 degrees
       false,
       ringPaint,
     );
 
-    // Red arc (left → top)
+    // Red arc (top-left quadrant)
     ringPaint.color = const Color(0xFFEA4335);
     canvas.drawArc(
       Rect.fromCircle(center: Offset(cx, cy), radius: r),
@@ -583,7 +634,7 @@ class _GooglePainter extends CustomPainter {
       ringPaint,
     );
 
-    // Yellow arc (bottom → left)
+    // Yellow arc (bottom-left quadrant)
     ringPaint.color = const Color(0xFFFBBC05);
     canvas.drawArc(
       Rect.fromCircle(center: Offset(cx, cy), radius: r),
@@ -593,7 +644,7 @@ class _GooglePainter extends CustomPainter {
       ringPaint,
     );
 
-    // Green arc (right → bottom)
+    // Green arc (bottom-right quadrant)
     ringPaint.color = const Color(0xFF34A853);
     canvas.drawArc(
       Rect.fromCircle(center: Offset(cx, cy), radius: r),
@@ -603,7 +654,7 @@ class _GooglePainter extends CustomPainter {
       ringPaint,
     );
 
-    // Horizontal bar of the "G"
+    // Horizontal blue bar completing the "G" shape
     final barPaint = Paint()
       ..color = const Color(0xFF4285F4)
       ..strokeWidth = size.width * 0.13
@@ -619,9 +670,11 @@ class _GooglePainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-/// Simple GitHub Octocat silhouette using a CustomPainter.
+/// Simple GitHub Octocat silhouette rendered using a [CustomPainter].
 class _GitHubIcon extends StatelessWidget {
   const _GitHubIcon({this.color = Colors.black});
+
+  /// Silhouette fill color.
   final Color color;
 
   @override
@@ -630,8 +683,11 @@ class _GitHubIcon extends StatelessWidget {
   }
 }
 
+/// [CustomPainter] that renders the GitHub Octocat head, body, and facial cutouts.
 class _GitHubPainter extends CustomPainter {
   const _GitHubPainter(this.color);
+
+  /// Primary fill color.
   final Color color;
 
   @override
@@ -641,10 +697,10 @@ class _GitHubPainter extends CustomPainter {
     final cy = size.height / 2 - size.height * 0.05;
     final r = size.width * 0.38;
 
-    // Head (circle)
+    // Head circle
     canvas.drawCircle(Offset(cx, cy), r, paint);
 
-    // Body (rounded rect below head)
+    // Rounded rectangle body below the head
     final bodyRect = RRect.fromRectAndRadius(
       Rect.fromCenter(
         center: Offset(cx, cy + r + size.height * 0.14),
@@ -655,7 +711,7 @@ class _GitHubPainter extends CustomPainter {
     );
     canvas.drawRRect(bodyRect, paint);
 
-    // White cutout (eye area / face)
+    // Contrasting cutout for face/eye region
     final facePaint = Paint()..color = color == Colors.white ? Colors.black : Colors.white;
     canvas.drawCircle(Offset(cx, cy - size.height * 0.04), r * 0.45, facePaint);
   }
