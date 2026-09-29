@@ -3,6 +3,8 @@ import 'package:brutal_wallz/models/wallpaper_model.dart';
 import 'package:brutal_wallz/globals/app_state.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   group('WallpaperModel', () {
     test('fromJson correctly parses bundled wallpapers.json format', () {
       final json = {
