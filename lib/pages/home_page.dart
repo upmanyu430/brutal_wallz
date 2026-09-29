@@ -380,7 +380,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             const Spacer(),
-            // Bottom sheet card with wallpaper title, category chip, and apply action
+            // Bottom sheet card with category chip, and apply action
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(24),
@@ -391,13 +391,6 @@ class _HomePageState extends State<HomePage> {
               child: Column(
                 spacing: 16,
                 children: [
-                  Text(
-                    wall.title.toUpperCase(),
-                    style: const TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
