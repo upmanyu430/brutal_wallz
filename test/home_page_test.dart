@@ -53,8 +53,14 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 350));
 
-    // Verify modal content is displayed with SET AS WALLPAPER button
+    // Verify modal content is displayed with SET AS WALLPAPER button and download button
     expect(find.text('SET AS WALLPAPER'), findsOneWidget);
+    expect(find.byIcon(Icons.arrow_downward), findsOneWidget);
+    await tester.tap(find.byIcon(Icons.arrow_downward));
+    await tester.pump();
+    expect(find.text('WALLPAPER SAVED TO GALLERY!'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pump(const Duration(milliseconds: 350));
     // Verify modal does not display the wallpaper title label
     expect(find.text(appState.wallpapers.first.title.toUpperCase()), findsNothing);
 
