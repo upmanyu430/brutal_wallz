@@ -4,9 +4,13 @@ import 'package:provider/provider.dart';
 import 'package:brutal_wallz/globals/app_state.dart';
 import 'package:brutal_wallz/pages/home_page.dart';
 
+/// Widget tests for [HomePage] verifying wallpaper grid rendering,
+/// image caching configuration, full-screen detail modal interactions,
+/// and navigation between modal and main views.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  /// Helper function to wrap [HomePage] in required [ChangeNotifierProvider] and [MaterialApp].
   Widget buildTestWidget(AppState appState) {
     return ChangeNotifierProvider<AppState>.value(
       value: appState,
@@ -17,14 +21,17 @@ void main() {
   }
 
   testWidgets('HomePage renders offline wallpaper assets in grid and modal', (WidgetTester tester) async {
+    // Set fixed virtual viewport dimensions to simulate a standard mobile screen
     tester.view.physicalSize = const Size(800, 1200);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
+    // Pre-populate AppState with wallpapers from asset bundle
     final appState = AppState();
     await appState.fetchWallpapers();
 
+    // Pump widget tree and settle pending frames/animations
     await tester.pumpWidget(buildTestWidget(appState));
     await tester.pumpAndSettle();
 

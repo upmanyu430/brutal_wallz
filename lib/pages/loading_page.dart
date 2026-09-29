@@ -2,6 +2,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+/// Animated splash and loading screen displayed during app transition.
+/// Showcases neo-brutalist animated components, a dynamic progress bar,
+/// bouncing dots, and step-by-step progress status messages before navigating to the home page.
 class LoadingPage extends StatefulWidget {
   const LoadingPage({super.key});
 
@@ -11,7 +14,7 @@ class LoadingPage extends StatefulWidget {
 
 class _LoadingPageState extends State<LoadingPage>
     with TickerProviderStateMixin {
-  // ─── Brand colours ───────────────────────────────────────────────────────────
+  // ─── Brand colours (consistent with global palette) ──────────────────────────
   static const Color bg     = Color(0xFFF4F0E6);
   static const Color yellow = Color(0xFFFDE047);
   static const Color pink   = Color(0xFFF9A8D4);
@@ -19,17 +22,19 @@ class _LoadingPageState extends State<LoadingPage>
   static const Color green  = Color(0xFF86EFAC);
   static const Color orange = Color(0xFFFDBA74);
 
-  // Progress bar fills over 2.4 s, then we navigate.
+  /// Total duration for the progress bar to complete loading (2.4 seconds).
   static const Duration _totalDuration = Duration(milliseconds: 2400);
 
+  // ─── Progress Bar Animation Controllers ──────────────────────────────────────
   late final AnimationController _progressCtrl;
   late final Animation<double>   _progressAnim;
 
+  // ─── Bouncing Dots Animation Controllers ─────────────────────────────────────
   // Three bouncing dots staggered by 200 ms each.
   late final AnimationController _dotCtrl;
   late final List<Animation<double>> _dotAnims;
 
-  // Colour cycle for the progress bar fill.
+  // Colour cycle for the progress bar fill as loading progresses.
   final List<Color> _barColors = [yellow, pink, green, blue, orange];
   int _barColorIdx = 0;
 
@@ -37,7 +42,7 @@ class _LoadingPageState extends State<LoadingPage>
   void initState() {
     super.initState();
 
-    // ── Progress bar ──────────────────────────────────────────────────────────
+    // ── Configure Progress Bar Animation ─────────────────────────────────────
     _progressCtrl = AnimationController(
       vsync: this,
       duration: _totalDuration,
@@ -47,7 +52,7 @@ class _LoadingPageState extends State<LoadingPage>
       curve: Curves.easeInOut,
     );
 
-    // Cycle bar colour every 500 ms while loading.
+    // Update fill color dynamically across the progress spectrum
     _progressCtrl.addListener(() {
       final newIdx = (_progressCtrl.value * (_barColors.length - 1)).floor();
       if (newIdx != _barColorIdx) {
@@ -55,16 +60,18 @@ class _LoadingPageState extends State<LoadingPage>
       }
     });
 
+    // Automatically navigate to the home dashboard upon animation completion
     _progressCtrl.forward().then((_) {
       if (mounted) context.go('/home-page');
     });
 
-    // ── Bouncing dots ─────────────────────────────────────────────────────────
+    // ── Configure Staggered Bouncing Dots Animation ───────────────────────────
     _dotCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 900),
     )..repeat();
 
+    // Create 3 staggered interval tweens for the vertical bounce effect
     _dotAnims = List.generate(3, (i) {
       final start = i * 0.2;
       return Tween<double>(begin: 0, end: -14).animate(
@@ -78,6 +85,7 @@ class _LoadingPageState extends State<LoadingPage>
 
   @override
   void dispose() {
+    // Release animation controllers to prevent memory leaks
     _progressCtrl.dispose();
     _dotCtrl.dispose();
     super.dispose();
@@ -112,7 +120,7 @@ class _LoadingPageState extends State<LoadingPage>
 
               const Spacer(),
 
-              // ── Headline ───────────────────────────────────────────────────
+              // ── Main bold headline ─────────────────────────────────────────
               const Text(
                 'GETTING\nYOUR\nWALLS.',
                 style: TextStyle(
@@ -125,7 +133,7 @@ class _LoadingPageState extends State<LoadingPage>
 
               const SizedBox(height: 40),
 
-              // ── Progress bar ───────────────────────────────────────────────
+              // ── Custom Neo-brutalist Progress Bar ──────────────────────────
               _BrutalProgressBar(
                 progress: _progressAnim,
                 fillColor: _barColors[_barColorIdx],
@@ -133,10 +141,10 @@ class _LoadingPageState extends State<LoadingPage>
 
               const SizedBox(height: 32),
 
-              // ── Status row ─────────────────────────────────────────────────
+              // ── Real-time status row (bouncing dots, status text & percentage)
               Row(
                 children: [
-                  // Bouncing dots
+                  // Animated bouncing dots indicator
                   AnimatedBuilder(
                     animation: _dotCtrl,
                     builder: (_, __) => Row(
@@ -160,6 +168,7 @@ class _LoadingPageState extends State<LoadingPage>
 
                   const SizedBox(width: 12),
 
+                  // Descriptive status label updated based on progress value
                   AnimatedBuilder(
                     animation: _progressAnim,
                     builder: (_, __) => Text(
@@ -173,7 +182,7 @@ class _LoadingPageState extends State<LoadingPage>
 
                   const Spacer(),
 
-                  // Percentage counter
+                  // Numerical percentage counter badge
                   AnimatedBuilder(
                     animation: _progressAnim,
                     builder: (_, __) => Container(
@@ -198,9 +207,9 @@ class _LoadingPageState extends State<LoadingPage>
 
               const SizedBox(height: 40),
 
-              // ── Decorative colour chips ────────────────────────────────────
+              // ── Decorative colour palette chips ────────────────────────────
               Row(
-                children: [
+                children: const [
                   _ColorChip(color: yellow),
                   _ColorChip(color: pink),
                   _ColorChip(color: green),
@@ -215,6 +224,7 @@ class _LoadingPageState extends State<LoadingPage>
     );
   }
 
+  /// Translates numerical progress [v] (0.0 to 1.0) into contextual phase messages.
   String _statusLabel(double v) {
     if (v < 0.30) return 'INITIALISING...';
     if (v < 0.60) return 'FETCHING WALLS...';
@@ -223,15 +233,20 @@ class _LoadingPageState extends State<LoadingPage>
   }
 }
 
-// ─── Progress bar widget ─────────────────────────────────────────────────────
+// ─── Custom Neo-brutalist Progress Bar Widget ────────────────────────────────
 
+/// Renders a thick bordered progress bar with a hard drop shadow
+/// and an animated fill width linked to the provided [progress] animation.
 class _BrutalProgressBar extends StatelessWidget {
   const _BrutalProgressBar({
     required this.progress,
     required this.fillColor,
   });
 
+  /// The animation driving the fractional width of the progress fill (0.0 to 1.0).
   final Animation<double> progress;
+
+  /// Active background color for the animated fill.
   final Color fillColor;
 
   @override
@@ -261,10 +276,13 @@ class _BrutalProgressBar extends StatelessWidget {
   }
 }
 
-// ─── Small colour square ─────────────────────────────────────────────────────
+// ─── Decorative Palette Chip Widget ──────────────────────────────────────────
 
+/// Small square color swatch bordered in black with a hard drop shadow.
 class _ColorChip extends StatelessWidget {
   const _ColorChip({required this.color});
+
+  /// The fill color of the chip.
   final Color color;
 
   @override
