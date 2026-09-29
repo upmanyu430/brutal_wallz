@@ -36,8 +36,6 @@ class _HomePageState extends State<HomePage> {
 
   String _searchQuery = '';
 
-  String _selectedCategory = 'All';
-
   WallpaperModel? selectedWallpaper;
 
   List<WallpaperModel> favorites = [];
@@ -45,14 +43,11 @@ class _HomePageState extends State<HomePage> {
   List<WallpaperModel> get filteredWallpapers {
     final appState = AppState.of(context);
     return appState.wallpapers.where((wall) {
-      final matchesCategory =
-          _selectedCategory == 'All' ||
-          wall.cat.toLowerCase() == _selectedCategory.toLowerCase();
       final matchesSearch =
           _searchQuery.isEmpty ||
           wall.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
           wall.cat.toLowerCase().contains(_searchQuery.toLowerCase());
-      return matchesCategory && matchesSearch;
+      return matchesSearch;
     }).toList();
   }
 
@@ -138,7 +133,6 @@ class _HomePageState extends State<HomePage> {
         return Column(
           children: [
             _buildHeader(),
-            _buildCategories(),
             Expanded(child: _buildWallpaperGrid(filteredWallpapers)),
           ],
         );
@@ -230,50 +224,6 @@ class _HomePageState extends State<HomePage> {
               const Icon(Icons.tune, color: Colors.black),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildCategories() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      decoration: BoxDecoration(
-        color: blue,
-        border: const Border(bottom: BorderSide(color: Colors.black, width: 4)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          _buildCategoryBtn('All', yellow, Icons.local_fire_department),
-          _buildCategoryBtn('General', Colors.white, Icons.wallpaper),
-          _buildCategoryBtn('Anime', Colors.white, Icons.animation),
-          _buildCategoryBtn('People', pink, Icons.people),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCategoryBtn(String category, Color color, IconData icon) {
-    final isSelected =
-        _selectedCategory.toLowerCase() == category.toLowerCase();
-    return SizedBox(
-      width: 60,
-      height: 60,
-      child: BrutalButton(
-        color: isSelected ? yellow : color,
-        shadowOffset: 4,
-        isActive: isSelected,
-        onTap: () {
-          setState(() {
-            if (_selectedCategory.toLowerCase() == category.toLowerCase() &&
-                category != 'All') {
-              _selectedCategory = 'All';
-            } else {
-              _selectedCategory = category;
-            }
-          });
-        },
-        child: Icon(icon, size: 28),
       ),
     );
   }
