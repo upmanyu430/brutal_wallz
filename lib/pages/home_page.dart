@@ -405,23 +405,45 @@ class _HomePageState extends State<HomePage> {
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 60,
-                    child: BrutalButton(
-                      color: green,
-                      shadowOffset: 6,
-                      onTap: setWallpaper,
-                      child: const Center(
-                        child: Text(
-                          'SET AS WALLPAPER',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w900,
+                  Row(
+                    spacing: 16,
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          height: 60,
+                          child: BrutalButton(
+                            color: green,
+                            shadowOffset: 6,
+                            onTap: setWallpaper,
+                            child: const Center(
+                              child: Text(
+                                'SET AS WALLPAPER',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
+                      SizedBox(
+                        width: 60,
+                        height: 60,
+                        child: BrutalButton(
+                          color: Colors.black,
+                          shadowOffset: 6,
+                          onTap: downloadWallpaper,
+                          child: const Center(
+                            child: Icon(
+                              Icons.arrow_downward,
+                              color: Colors.white,
+                              size: 28,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -468,6 +490,11 @@ class _HomePageState extends State<HomePage> {
   /// Simulates applying the selected wallpaper to the device home/lock screen.
   void setWallpaper() {
     showToast('WALLPAPER APPLIED!');
+  }
+
+  /// Simulates downloading the high-resolution image to the device gallery.
+  void downloadWallpaper() {
+    showToast('WALLPAPER SAVED TO GALLERY!');
   }
 
   /// Opens the About dialog presenting version details and aesthetic info.
