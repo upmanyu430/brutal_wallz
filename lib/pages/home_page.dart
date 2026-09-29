@@ -487,9 +487,92 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  /// Simulates applying the selected wallpaper to the device home/lock screen.
+  /// Displays a bottom sheet to select where to apply the wallpaper.
   void setWallpaper() {
-    showToast('WALLPAPER APPLIED!');
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: bg,
+            border: const Border(
+              top: BorderSide(color: Colors.black, width: 4),
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text(
+                'APPLY TO:',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w900,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                height: 60,
+                child: BrutalButton(
+                  color: yellow,
+                  shadowOffset: 4,
+                  onTap: () {
+                    Navigator.pop(context);
+                    showToast('APPLIED TO HOME SCREEN!');
+                  },
+                  child: const Center(
+                    child: Text(
+                      'HOME SCREEN',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                height: 60,
+                child: BrutalButton(
+                  color: blue,
+                  shadowOffset: 4,
+                  onTap: () {
+                    Navigator.pop(context);
+                    showToast('APPLIED TO LOCK SCREEN!');
+                  },
+                  child: const Center(
+                    child: Text(
+                      'LOCK SCREEN',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                height: 60,
+                child: BrutalButton(
+                  color: green,
+                  shadowOffset: 4,
+                  onTap: () {
+                    Navigator.pop(context);
+                    showToast('APPLIED TO BOTH!');
+                  },
+                  child: const Center(
+                    child: Text(
+                      'BOTH',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   /// Simulates downloading the high-resolution image to the device gallery.
