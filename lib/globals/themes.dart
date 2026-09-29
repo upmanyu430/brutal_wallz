@@ -14,5 +14,5 @@ final ThemeData lightTheme = ThemeData(
 @NowaGenerated()
 final ThemeData darkTheme = ThemeData(
   colorScheme: const ColorScheme.dark(),
-  textTheme: GoogleFonts.ubuntuSansMonoTextTheme(),
+  textTheme: GoogleFonts.ubuntuSansMonoTextTheme(ThemeData.dark().textTheme),
 );
