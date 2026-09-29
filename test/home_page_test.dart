@@ -4,9 +4,13 @@ import 'package:provider/provider.dart';
 import 'package:brutal_wallz/globals/app_state.dart';
 import 'package:brutal_wallz/pages/home_page.dart';
 
+/// Widget tests for [HomePage] verifying wallpaper grid rendering,
+/// image caching configuration, full-screen detail modal interactions,
+/// and navigation between modal and main views.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  /// Helper function to wrap [HomePage] in required [ChangeNotifierProvider] and [MaterialApp].
   Widget buildTestWidget(AppState appState) {
     return ChangeNotifierProvider<AppState>.value(
       value: appState,
@@ -16,20 +20,31 @@ void main() {
     );
   }
 
-  testWidgets('HomePage renders offline wallpaper assets in grid and modal', (WidgetTester tester) async {
+  /// Helper function to configure the viewport, initialize state, and pump the initial widget.
+  Future<AppState> setupHomePageTest(WidgetTester tester) async {
+    // Set fixed virtual viewport dimensions to simulate a standard mobile screen
     tester.view.physicalSize = const Size(800, 1200);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
+    // Pre-populate AppState with wallpapers from asset bundle
     final appState = AppState();
     await tester.runAsync(() async {
       await appState.fetchWallpapers();
     });
 
+    // Pump widget tree and settle pending frames/animations
     await tester.pumpWidget(buildTestWidget(appState));
     await tester.pumpAndSettle();
+    
+    return appState;
+  }
 
+  testWidgets('HomePage renders offline wallpaper assets in grid and modal', (WidgetTester tester) async {
+    final appState = await setupHomePageTest(tester);
+
+    // 1. Verify wallpapers grid items are rendered as Image.asset with cacheWidth
     final imageFinder = find.byType(Image);
     expect(imageFinder, findsWidgets);
 
@@ -40,11 +55,13 @@ void main() {
     expect(resizeImage.width, 300);
     expect(imageWidget.fit, BoxFit.cover);
 
+    // 2. Tap on the first wallpaper in the grid to open the modal
     final firstImageFinder = find.byType(Image).first;
     expect(firstImageFinder, findsOneWidget);
     await tester.tap(firstImageFinder);
     await tester.pumpAndSettle();
 
+    // Verify modal content is displayed with SET AS WALLPAPER button and download button
     expect(find.text('SET AS WALLPAPER'), findsOneWidget);
     expect(find.byIcon(Icons.arrow_downward), findsOneWidget);
     await tester.tap(find.byIcon(Icons.arrow_downward));
@@ -52,8 +69,10 @@ void main() {
     expect(find.text('WALLPAPER SAVED TO GALLERY!'), findsOneWidget);
     await tester.pump(const Duration(seconds: 3));
     await tester.pumpAndSettle();
+    // Verify modal does not display the wallpaper title label
     expect(find.text(appState.wallpapers.first.title.toUpperCase()), findsNothing);
 
+    // 3. Verify Modal Container has DecorationImage with AssetImage
     final modalImageFinder = find.byWidgetPredicate((widget) {
       if (widget is Container && widget.decoration is BoxDecoration) {
         final boxDecoration = widget.decoration as BoxDecoration;
@@ -66,6 +85,7 @@ void main() {
     });
     expect(modalImageFinder, findsOneWidget);
 
+    // 4. Close the modal by tapping back button
     final backButtonFinder = find.byIcon(Icons.arrow_back);
     expect(backButtonFinder, findsOneWidget);
     await tester.tap(backButtonFinder);
@@ -73,18 +93,7 @@ void main() {
   });
 
   testWidgets('HomePage displays bottom sheet with target options when tapping SET AS WALLPAPER', (WidgetTester tester) async {
-    tester.view.physicalSize = const Size(800, 1200);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-
-    final appState = AppState();
-    await tester.runAsync(() async {
-      await appState.fetchWallpapers();
-    });
-
-    await tester.pumpWidget(buildTestWidget(appState));
-    await tester.pumpAndSettle();
+    await setupHomePageTest(tester);
 
     final firstImageFinder = find.byType(Image).first;
     await tester.tap(firstImageFinder);
@@ -128,18 +137,7 @@ void main() {
   });
 
   testWidgets('Selecting LOCK SCREEN in target selection sheet shows applied toast', (WidgetTester tester) async {
-    tester.view.physicalSize = const Size(800, 1200);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-
-    final appState = AppState();
-    await tester.runAsync(() async {
-      await appState.fetchWallpapers();
-    });
-
-    await tester.pumpWidget(buildTestWidget(appState));
-    await tester.pumpAndSettle();
+    await setupHomePageTest(tester);
 
     await tester.tap(find.byType(Image).first);
     await tester.pumpAndSettle();
@@ -157,18 +155,7 @@ void main() {
   });
 
   testWidgets('Selecting BOTH in target selection sheet shows applied toast', (WidgetTester tester) async {
-    tester.view.physicalSize = const Size(800, 1200);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-
-    final appState = AppState();
-    await tester.runAsync(() async {
-      await appState.fetchWallpapers();
-    });
-
-    await tester.pumpWidget(buildTestWidget(appState));
-    await tester.pumpAndSettle();
+    await setupHomePageTest(tester);
 
     await tester.tap(find.byType(Image).first);
     await tester.pumpAndSettle();
