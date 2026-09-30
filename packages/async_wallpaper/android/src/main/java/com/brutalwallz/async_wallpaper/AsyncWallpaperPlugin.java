@@ -281,6 +281,7 @@ public class AsyncWallpaperPlugin extends Application implements FlutterPlugin, 
                     return;
                 }
                 WallpaperManager wallpaperManager = WallpaperManager.getInstance(context);
+                android.util.Log.i("AsyncWallpaper", "applyWallpaperFromFile flag=" + flag + ", filePath=" + cleanPath);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                     wallpaperManager.setBitmap(bitmap, null, true, flag);
                 } else {
