@@ -101,22 +101,7 @@ class _LoadingPageState extends State<LoadingPage>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ── Top badge ──────────────────────────────────────────────────
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: yellow,
-                  border: Border.all(color: Colors.black, width: 3),
-                  boxShadow: const [
-                    BoxShadow(color: Colors.black, offset: Offset(4, 4)),
-                  ],
-                ),
-                child: const Text(
-                  'LOADING',
-                  style: TextStyle(fontWeight: FontWeight.w900, fontSize: 11),
-                ),
-              ),
+
 
               const Spacer(),
 
