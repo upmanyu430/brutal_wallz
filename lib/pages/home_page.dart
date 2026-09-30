@@ -248,7 +248,7 @@ class _HomePageState extends State<HomePage> {
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
-            // Show clear button when query is present; otherwise show decorative filter tune icon
+            // Show clear button when query is present
             if (_searchQuery.isNotEmpty)
               GestureDetector(
                 onTap: () {
@@ -257,9 +257,7 @@ class _HomePageState extends State<HomePage> {
                   });
                 },
                 child: const Icon(Icons.close, color: Colors.black),
-              )
-            else
-              const Icon(Icons.tune, color: Colors.black),
+              ),
           ],
         ),
       ),
