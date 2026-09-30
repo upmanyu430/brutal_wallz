@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'dart:io' show Platform;
+import 'dart:io' show Platform, File;
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:async_wallpaper/async_wallpaper.dart';
 import 'package:brutal_wallz/models/wallpaper_model.dart';
 import 'package:brutal_wallz/globals/app_state.dart';
@@ -475,10 +477,12 @@ class _HomePageState extends State<HomePage> {
                               color: green,
                               shadowOffset: 6,
                               onTap: _isApplyingWallpaper ? () {} : setWallpaper,
-                              child: const Center(
+                              child: Center(
                                 child: Text(
-                                  'SET AS WALLPAPER',
-                                  style: TextStyle(
+                                  _isApplyingWallpaper
+                                      ? 'APPLYING…'
+                                      : 'SET AS WALLPAPER',
+                                  style: const TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w900,
                                   ),
@@ -738,6 +742,65 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  /// Resolves [imagePath] into a local filesystem path accessible by native platform services.
+  /// Downloads remote URLs to local cache, copies Flutter assets to a temporary cache file,
+  /// and returns verified local disk file paths.
+  Future<String?> _resolveWallpaperFile(String imagePath) async {
+    try {
+      if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+        final file = await DefaultCacheManager().getSingleFile(imagePath);
+        return file.path;
+      }
+
+      if (imagePath.startsWith('assets/')) {
+        final byteData = await rootBundle.load(imagePath);
+        final tempDir = await getTemporaryDirectory();
+        final fileName = imagePath.split('/').last;
+        final tempFile = File('${tempDir.path}/$fileName');
+        await tempFile.writeAsBytes(
+          byteData.buffer.asUint8List(
+            byteData.offsetInBytes,
+            byteData.lengthInBytes,
+          ),
+          flush: true,
+        );
+        return tempFile.path;
+      }
+
+      // Check if it's already a local file path
+      final cleanPath = imagePath.startsWith('file://')
+          ? imagePath.replaceFirst('file://', '')
+          : imagePath;
+      final file = File(cleanPath);
+      if (await file.exists()) {
+        return file.path;
+      }
+
+      // Fallback: If path does not start with assets/ but is an asset reference
+      try {
+        final byteData = await rootBundle.load(imagePath);
+        final tempDir = await getTemporaryDirectory();
+        final fileName = imagePath.split('/').last;
+        final tempFile = File('${tempDir.path}/$fileName');
+        await tempFile.writeAsBytes(
+          byteData.buffer.asUint8List(
+            byteData.offsetInBytes,
+            byteData.lengthInBytes,
+          ),
+          flush: true,
+        );
+        return tempFile.path;
+      } catch (_) {
+        // Not an asset
+      }
+
+      return null;
+    } catch (e) {
+      debugPrint('Error resolving wallpaper file: $e');
+      return null;
+    }
+  }
+
   /// Applies [selectedWallpaper] to the given [wallpaperLocation] screen(s)
   /// using [async_wallpaper]. Shows a loading toast immediately, then a
   /// success or failure toast once the platform call resolves.
@@ -749,9 +812,9 @@ class _HomePageState extends State<HomePage> {
   Future<void> _applyWallpaper(int wallpaperLocation) async {
     if (selectedWallpaper == null) return;
 
-    // async_wallpaper only sets wallpapers on Android; on iOS it is unsupported.
+    // async_wallpaper only sets wallpapers on Android; on other platforms it is unsupported.
     if (!Platform.isAndroid) {
-      showToast('NOT SUPPORTED ON iOS');
+      showToast('NOT SUPPORTED ON THIS PLATFORM');
       return;
     }
 
@@ -760,12 +823,24 @@ class _HomePageState extends State<HomePage> {
 
     bool result = false;
     try {
-      result = await AsyncWallpaper.setWallpaper(
-        url: selectedWallpaper!.imageUrl,
-        wallpaperLocation: wallpaperLocation,
-        goToHome: false,
-      );
-    } catch (_) {
+      final localFilePath =
+          await _resolveWallpaperFile(selectedWallpaper!.imageUrl);
+      if (localFilePath != null) {
+        result = await AsyncWallpaper.setWallpaperFromFile(
+          filePath: localFilePath,
+          wallpaperLocation: wallpaperLocation,
+          goToHome: false,
+        ).timeout(const Duration(seconds: 15), onTimeout: () => false);
+      } else {
+        // Direct URL fallback if file resolution fails
+        result = await AsyncWallpaper.setWallpaper(
+          url: selectedWallpaper!.imageUrl,
+          wallpaperLocation: wallpaperLocation,
+          goToHome: false,
+        ).timeout(const Duration(seconds: 15), onTimeout: () => false);
+      }
+    } catch (e) {
+      debugPrint('Error applying wallpaper: $e');
       result = false;
     } finally {
       if (mounted) setState(() => _isApplyingWallpaper = false);
