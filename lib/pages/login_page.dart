@@ -144,23 +144,6 @@ class _LoginPageState extends State<LoginPage> {
 
           const SizedBox(height: 36),
 
-          // Top aesthetic tag badge
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: yellow,
-              border: Border.all(color: Colors.black, width: 3),
-              boxShadow: const [
-                BoxShadow(color: Colors.black, offset: Offset(4, 4)),
-              ],
-            ),
-            child: const Text(
-              'NEO-BRUTALIST WALLS',
-              style: TextStyle(fontWeight: FontWeight.w900, fontSize: 11),
-            ),
-          ),
-
-          const SizedBox(height: 16),
 
           // Bold title typography
           const Text(
