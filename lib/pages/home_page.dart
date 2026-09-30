@@ -551,7 +551,7 @@ class _HomePageState extends State<HomePage> {
               mainAxisAlignment: MainAxisAlignment.center,
               spacing: 16,
               children: [
-                _mockWidgetContainer(Icons.cloud, '22°'),
+                _mockWidgetContainer(Icons.cloud, '22\u00B0'),
                 _mockWidgetContainer(Icons.fitness_center, '452 kcal'),
               ],
             ),
