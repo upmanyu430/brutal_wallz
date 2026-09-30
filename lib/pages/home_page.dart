@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:io' show Platform;
+import 'package:async_wallpaper/async_wallpaper.dart';
 import 'package:brutal_wallz/models/wallpaper_model.dart';
 import 'package:brutal_wallz/globals/app_state.dart';
 import 'package:nowa_runtime/nowa_runtime.dart';
@@ -62,6 +64,9 @@ class _HomePageState extends State<HomePage> {
 
   /// In-memory collection of wallpapers marked as favorite by the user
   List<WallpaperModel> favorites = [];
+
+  /// True while a wallpaper apply operation is in progress.
+  bool _isApplyingWallpaper = false;
 
   /// Returns wallpaper models matching the current [_searchQuery] filter
   /// by checking both the wallpaper title and category.
@@ -469,7 +474,7 @@ class _HomePageState extends State<HomePage> {
                             child: BrutalButton(
                               color: green,
                               shadowOffset: 6,
-                              onTap: setWallpaper,
+                              onTap: _isApplyingWallpaper ? () {} : setWallpaper,
                               child: const Center(
                                 child: Text(
                                   'SET AS WALLPAPER',
@@ -676,7 +681,7 @@ class _HomePageState extends State<HomePage> {
                   shadowOffset: 4,
                   onTap: () {
                     Navigator.pop(context);
-                    showToast('APPLIED TO HOME SCREEN!');
+                    _applyWallpaper(AsyncWallpaper.HOME_SCREEN);
                   },
                   child: const Center(
                     child: Text(
@@ -695,7 +700,7 @@ class _HomePageState extends State<HomePage> {
                   shadowOffset: 4,
                   onTap: () {
                     Navigator.pop(context);
-                    showToast('APPLIED TO LOCK SCREEN!');
+                    _applyWallpaper(AsyncWallpaper.LOCK_SCREEN);
                   },
                   child: const Center(
                     child: Text(
@@ -714,7 +719,7 @@ class _HomePageState extends State<HomePage> {
                   shadowOffset: 4,
                   onTap: () {
                     Navigator.pop(context);
-                    showToast('APPLIED TO BOTH!');
+                    _applyWallpaper(AsyncWallpaper.BOTH_SCREENS);
                   },
                   child: const Center(
                     child: Text(
@@ -731,6 +736,49 @@ class _HomePageState extends State<HomePage> {
         );
       },
     );
+  }
+
+  /// Applies [selectedWallpaper] to the given [wallpaperLocation] screen(s)
+  /// using [async_wallpaper]. Shows a loading toast immediately, then a
+  /// success or failure toast once the platform call resolves.
+  ///
+  /// [wallpaperLocation] must be one of:
+  /// - [AsyncWallpaper.HOME_SCREEN]
+  /// - [AsyncWallpaper.LOCK_SCREEN]
+  /// - [AsyncWallpaper.BOTH_SCREENS]
+  Future<void> _applyWallpaper(int wallpaperLocation) async {
+    if (selectedWallpaper == null) return;
+
+    // async_wallpaper only sets wallpapers on Android; on iOS it is unsupported.
+    if (!Platform.isAndroid) {
+      showToast('NOT SUPPORTED ON iOS');
+      return;
+    }
+
+    setState(() => _isApplyingWallpaper = true);
+    showToast('APPLYING…');
+
+    bool result = false;
+    try {
+      result = await AsyncWallpaper.setWallpaper(
+        url: selectedWallpaper!.imageUrl,
+        wallpaperLocation: wallpaperLocation,
+        goToHome: false,
+      );
+    } catch (_) {
+      result = false;
+    } finally {
+      if (mounted) setState(() => _isApplyingWallpaper = false);
+    }
+
+    if (!mounted) return;
+
+    final label = wallpaperLocation == AsyncWallpaper.HOME_SCREEN
+        ? 'HOME SCREEN'
+        : wallpaperLocation == AsyncWallpaper.LOCK_SCREEN
+            ? 'LOCK SCREEN'
+            : 'BOTH';
+    showToast(result ? 'APPLIED TO $label!' : 'FAILED — TRY AGAIN');
   }
 
   /// Simulates downloading the high-resolution image to the device gallery.
