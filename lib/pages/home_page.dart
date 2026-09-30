@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:brutal_wallz/models/wallpaper_model.dart';
 import 'package:brutal_wallz/globals/app_state.dart';
 import 'package:nowa_runtime/nowa_runtime.dart';
@@ -615,6 +616,7 @@ class _HomePageState extends State<HomePage> {
 
   /// Adds or removes [wall] from the [favorites] list.
   void toggleFavorite(WallpaperModel wall) {
+    HapticFeedback.heavyImpact();
     final isAlreadyFav = favorites.any((f) => f.id == wall.id);
     setState(() {
       if (isAlreadyFav) {
@@ -641,6 +643,7 @@ class _HomePageState extends State<HomePage> {
 
   /// Displays a bottom sheet to select where to apply the wallpaper.
   void setWallpaper() {
+    HapticFeedback.heavyImpact();
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
