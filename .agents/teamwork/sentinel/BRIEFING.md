@@ -6,7 +6,7 @@ Supervise the execution of fixing the "SET AS WALLPAPER" feature in Brutal Wallz
 ## 🔒 My Identity
 - Archetype: sentinel
 - Working directory: c:\Users\soura\Desktop\Code\Brutal Wallz\.agents\teamwork\sentinel
-- Orchestrator: TBD
+- Orchestrator: 8043f861-93d6-49ef-b2ff-fcb2ff86ff3d (SWE Light Orchestrator)
 - Victory Auditor: to be spawned on victory claim
 
 ## 🔒 Key Constraints
@@ -20,7 +20,9 @@ Supervise the execution of fixing the "SET AS WALLPAPER" feature in Brutal Wallz
 - **Delivered results**: none
 
 ## Project Status
-- **Phase**: not started
+- **Phase**: in progress
+- **Progress Cron**: task-24 (*/8 * * * *)
+- **Liveness Cron**: task-26 (*/10 * * * *)
 
 ## Victory Audit Status
 - **Triggered**: no
