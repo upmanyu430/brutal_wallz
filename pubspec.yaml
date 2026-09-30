@@ -19,6 +19,8 @@ dependencies:
   dio: any
   go_router: any
   google_fonts: ^6.3.0
+  cached_network_image: ^3.3.1
+  flutter_cache_manager: ^3.3.2
 
 dev_dependencies:
   flutter_test:
