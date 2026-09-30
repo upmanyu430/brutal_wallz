@@ -354,6 +354,10 @@ class _HomePageState extends State<HomePage> {
     }
     final wall = selectedWallpaper!;
     final isFav = favorites.any((f) => f.id == wall.id);
+    final relatedWallpapers = AppState.of(context, listen: false)
+        .wallpapers
+        .where((w) => w.cat == wall.cat && w.id != wall.id)
+        .toList();
 
     return Material(
       color: Colors.black,
@@ -500,6 +504,43 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ],
                     ),
+                    if (relatedWallpapers.isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      const Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'SIMILAR AESTHETICS',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        height: 100,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: relatedWallpapers.length,
+                          separatorBuilder: (context, index) => const SizedBox(width: 12),
+                          itemBuilder: (context, index) {
+                            final related = relatedWallpapers[index];
+                            return SizedBox(
+                              width: 70,
+                              child: BrutalButton(
+                                color: Colors.white,
+                                shadowOffset: 4,
+                                onTap: () => openWallpaper(related),
+                                child: _buildResponsiveImage(
+                                  related.thumbnailUrl,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
