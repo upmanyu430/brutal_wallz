@@ -3,6 +3,7 @@ import 'package:brutal_wallz/models/wallpaper_model.dart';
 import 'package:brutal_wallz/globals/app_state.dart';
 import 'package:nowa_runtime/nowa_runtime.dart';
 import 'package:brutal_wallz/components/brutal_button.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 /// Main screen of the Brutal Wallz application.
 /// Houses the wallpaper gallery, interactive search, favorites collection,
@@ -267,6 +268,26 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Widget _buildResponsiveImage(String path, {int? cacheWidth, BoxFit? fit}) {
+    if (path.startsWith('http')) {
+      return CachedNetworkImage(
+        imageUrl: path,
+        memCacheWidth: cacheWidth,
+        fit: fit,
+        placeholder: (context, url) => const Center(
+          child: CircularProgressIndicator(color: Colors.black),
+        ),
+        errorWidget: (context, url, error) => const Icon(Icons.broken_image, size: 50),
+      );
+    }
+    return Image.asset(
+      path,
+      cacheWidth: cacheWidth,
+      fit: fit,
+      errorBuilder: (c, o, s) => const Icon(Icons.broken_image, size: 50),
+    );
+  }
+
   /// Builds the 2-column scrollable grid of wallpaper cards.
   /// Handles loading indicators, error feedback, and empty result placeholders.
   Widget _buildWallpaperGrid(List<WallpaperModel> list) {
@@ -317,13 +338,8 @@ class _HomePageState extends State<HomePage> {
           fit: StackFit.expand,
           children: [
             // Downsampled thumbnail image rendering to conserve memory in grid view
-            Image.asset(
-              list[index].thumbnailUrl,
-              cacheWidth: 300,
-              fit: BoxFit.cover,
-              errorBuilder: (c, o, s) =>
-                  const Icon(Icons.broken_image, size: 50),
-            ),
+            _buildResponsiveImage(list[index].thumbnailUrl,
+                cacheWidth: 300, fit: BoxFit.cover),
           ],
         ),
       ),
@@ -347,7 +363,7 @@ class _HomePageState extends State<HomePage> {
           InteractiveViewer(
             minScale: 1.0,
             maxScale: 4.0,
-            child: Image.asset(
+            child: _buildResponsiveImage(
               wall.imageUrl,
               fit: BoxFit.cover,
             ),
