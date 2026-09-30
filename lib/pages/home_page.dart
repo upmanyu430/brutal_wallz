@@ -46,6 +46,9 @@ class _HomePageState extends State<HomePage> {
   /// Controls the slide-down animated toast banner visibility
   bool isToastVisible = false;
 
+  /// Controls whether simulated lock screen preview mode is active in the wallpaper detail modal
+  bool isPreviewMode = false;
+
   /// Current active bottom navigation tab index (0: Explore, 1: Favorites, 2: Settings)
   int _currentIndex = 0;
 
@@ -63,8 +66,7 @@ class _HomePageState extends State<HomePage> {
   List<WallpaperModel> get filteredWallpapers {
     final appState = AppState.of(context);
     return appState.wallpapers.where((wall) {
-      final matchesSearch =
-          _searchQuery.isEmpty ||
+      final matchesSearch = _searchQuery.isEmpty ||
           wall.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
           wall.cat.toLowerCase().contains(_searchQuery.toLowerCase());
       return matchesSearch;
@@ -94,6 +96,7 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       selectedWallpaper = wall;
       isModalOpen = true;
+      isPreviewMode = false;
     });
   }
 
@@ -318,7 +321,8 @@ class _HomePageState extends State<HomePage> {
               list[index].thumbnailUrl,
               cacheWidth: 300,
               fit: BoxFit.cover,
-              errorBuilder: (c, o, s) => const Icon(Icons.broken_image, size: 50),
+              errorBuilder: (c, o, s) =>
+                  const Icon(Icons.broken_image, size: 50),
             ),
           ],
         ),
@@ -336,118 +340,251 @@ class _HomePageState extends State<HomePage> {
 
     return Material(
       color: Colors.black,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.black,
-          image: DecorationImage(
-            image: AssetImage(wall.imageUrl),
-            fit: BoxFit.cover,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // 1. Interactive Image Viewer
+          InteractiveViewer(
+            minScale: 1.0,
+            maxScale: 4.0,
+            child: Image.asset(
+              wall.imageUrl,
+              fit: BoxFit.cover,
+            ),
           ),
-        ),
-        child: Column(
-          children: [
+
+          // 2. Simulated Lock Screen Overlay (Visible only in Preview Mode)
+          if (isPreviewMode) _buildLockScreenOverlay(),
+
+          // 3. UI Controls (Hidden during full Preview Mode, except for a way to exit)
+          if (!isPreviewMode) ...[
             // Top action bar with Back and Favorite toggle buttons
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  SizedBox(
-                    width: 50,
-                    height: 50,
-                    child: BrutalButton(
-                      color: Colors.white,
-                      shadowOffset: 4,
-                      onTap: closeWallpaper,
-                      child: const Icon(Icons.arrow_back),
-                    ),
-                  ),
-                  SizedBox(
-                    width: 50,
-                    height: 50,
-                    child: BrutalButton(
-                      color: isFav ? pink : Colors.white,
-                      shadowOffset: 4,
-                      onTap: () => toggleFavorite(wall),
-                      child: Icon(
-                        isFav ? Icons.favorite : Icons.favorite_border,
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    SizedBox(
+                      width: 50,
+                      height: 50,
+                      child: BrutalButton(
+                        color: Colors.white,
+                        shadowOffset: 4,
+                        onTap: closeWallpaper,
+                        child: const Icon(Icons.arrow_back),
                       ),
                     ),
-                  ),
-                ],
+                    Row(
+                      spacing: 16,
+                      children: [
+                        // New Preview Mode Toggle Button
+                        SizedBox(
+                          width: 50,
+                          height: 50,
+                          child: BrutalButton(
+                            color: Colors.white,
+                            shadowOffset: 4,
+                            onTap: () => setState(() => isPreviewMode = true),
+                            child: const Icon(Icons.remove_red_eye),
+                          ),
+                        ),
+                        // Existing Favorite button
+                        SizedBox(
+                          width: 50,
+                          height: 50,
+                          child: BrutalButton(
+                            color: isFav ? pink : Colors.white,
+                            shadowOffset: 4,
+                            onTap: () => toggleFavorite(wall),
+                            child: Icon(
+                              isFav ? Icons.favorite : Icons.favorite_border,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-            const Spacer(),
+
             // Bottom sheet card with category chip, and apply action
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(24),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                border: Border(top: BorderSide(color: Colors.black, width: 8)),
-              ),
-              child: Column(
-                spacing: 16,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 4,
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(24),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  border:
+                      Border(top: BorderSide(color: Colors.black, width: 8)),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 16,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: yellow,
+                        border: Border.all(color: Colors.black, width: 2),
+                      ),
+                      child: Text(
+                        wall.cat,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
                     ),
-                    decoration: BoxDecoration(
-                      color: yellow,
-                      border: Border.all(color: Colors.black, width: 2),
-                    ),
-                    child: Text(
-                      wall.cat,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  Row(
-                    spacing: 16,
-                    children: [
-                      Expanded(
-                        child: SizedBox(
-                          height: 60,
-                          child: BrutalButton(
-                            color: green,
-                            shadowOffset: 6,
-                            onTap: setWallpaper,
-                            child: const Center(
-                              child: Text(
-                                'SET AS WALLPAPER',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w900,
+                    Row(
+                      spacing: 16,
+                      children: [
+                        Expanded(
+                          child: SizedBox(
+                            height: 60,
+                            child: BrutalButton(
+                              color: green,
+                              shadowOffset: 6,
+                              onTap: setWallpaper,
+                              child: const Center(
+                                child: Text(
+                                  'SET AS WALLPAPER',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w900,
+                                  ),
                                 ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                      SizedBox(
-                        width: 60,
-                        height: 60,
-                        child: BrutalButton(
-                          color: Colors.black,
-                          shadowOffset: 6,
-                          onTap: downloadWallpaper,
-                          child: const Center(
-                            child: Icon(
-                              Icons.arrow_downward,
-                              color: Colors.white,
-                              size: 28,
+                        SizedBox(
+                          width: 60,
+                          height: 60,
+                          child: BrutalButton(
+                            color: Colors.black,
+                            shadowOffset: 6,
+                            onTap: downloadWallpaper,
+                            child: const Center(
+                              child: Icon(
+                                Icons.arrow_downward,
+                                color: Colors.white,
+                                size: 28,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
+
+          // 4. Exit Preview Mode Button
+          if (isPreviewMode)
+            Positioned(
+              bottom: 40,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: SizedBox(
+                  height: 50,
+                  width: 200,
+                  child: BrutalButton(
+                    color: Colors.white,
+                    shadowOffset: 4,
+                    onTap: () => setState(() => isPreviewMode = false),
+                    child: const Center(
+                      child: Text(
+                        'EXIT PREVIEW',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// Builds the simulated lock screen overlay containing time, date, and mock status widgets.
+  Widget _buildLockScreenOverlay() {
+    return IgnorePointer(
+      child: Padding(
+        padding: const EdgeInsets.only(top: 80, left: 24, right: 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const Icon(Icons.lock, color: Colors.white, size: 24),
+            const SizedBox(height: 8),
+            const Text(
+              '09:41',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 72,
+                fontWeight: FontWeight.w200,
+                shadows: [Shadow(color: Colors.black54, blurRadius: 10)],
+              ),
+            ),
+            const Text(
+              'Wednesday, October 1',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                shadows: [Shadow(color: Colors.black54, blurRadius: 8)],
+              ),
+            ),
+            const SizedBox(height: 32),
+            // Mock Widgets Row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              spacing: 16,
+              children: [
+                _mockWidgetContainer(Icons.cloud, '22°'),
+                _mockWidgetContainer(Icons.fitness_center, '452 kcal'),
+              ],
+            ),
+          ],
         ),
+      ),
+    );
+  }
+
+  /// Builds a small rounded rectangular container simulating lock screen widgets.
+  Widget _mockWidgetContainer(IconData icon, String text) {
+    return Container(
+      width: 60,
+      height: 60,
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: Colors.white, size: 20),
+          const SizedBox(height: 4),
+          Text(
+            text,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -456,6 +593,7 @@ class _HomePageState extends State<HomePage> {
   void closeWallpaper() {
     setState(() {
       isModalOpen = false;
+      isPreviewMode = false;
     });
   }
 
@@ -524,7 +662,8 @@ class _HomePageState extends State<HomePage> {
                   child: const Center(
                     child: Text(
                       'HOME SCREEN',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),
@@ -542,7 +681,8 @@ class _HomePageState extends State<HomePage> {
                   child: const Center(
                     child: Text(
                       'LOCK SCREEN',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),
@@ -560,7 +700,8 @@ class _HomePageState extends State<HomePage> {
                   child: const Center(
                     child: Text(
                       'BOTH',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),
