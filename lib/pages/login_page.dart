@@ -50,7 +50,9 @@ class _LoginPageState extends State<LoginPage> {
 
   /// Navigates user into the application flow starting from the animated loading screen.
   void _navigateHome() {
-    sharedPrefs.setBool('has_logged_in', true);
+    try {
+      sharedPrefs.setBool('has_logged_in', true);
+    } catch (_) {}
     context.go('/loading-page');
   }
 
