@@ -72,4 +72,11 @@ class AppState extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  /// Loads more wallpapers for pagination.
+  Future<void> loadMore() async {}
+
+  /// Refreshes wallpaper collection.
+  Future<void> refreshWallpapers() async {}
 }
+

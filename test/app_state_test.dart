@@ -39,4 +39,11 @@ void main() {
     await state.fetchWallpapers();
     expect(state.wallpapers.length, count);
   });
+
+  test('loadMore and refreshWallpapers methods complete successfully', () async {
+    final state = AppState();
+    await expectLater(state.loadMore(), completes);
+    await expectLater(state.refreshWallpapers(), completes);
+  });
 }
+

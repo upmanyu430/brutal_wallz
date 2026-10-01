@@ -80,6 +80,9 @@ class _HomePageState extends State<HomePage> {
   /// Timer controlling the auto-dismissal of the animated toast notification banner.
   Timer? _toastTimer;
 
+  /// Scroll controller to detect scroll position near bottom for pagination.
+  late final ScrollController _scrollController;
+
   /// Returns wallpaper models matching the current [_searchQuery] filter
   /// by checking both the wallpaper title and category.
   List<WallpaperModel> get filteredWallpapers {
@@ -95,6 +98,8 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll);
     try {
       final favString = sharedPrefs.getString('favorites');
       if (favString != null) {
@@ -112,8 +117,20 @@ class _HomePageState extends State<HomePage> {
     _calculateCacheSize();
   }
 
+  /// Listener on [_scrollController] that triggers loading more wallpapers
+  /// when the user scrolls near the bottom of the grid.
+  void _onScroll() {
+    if (_scrollController.hasClients &&
+        _scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200) {
+      AppState.of(context, listen: false).loadMore();
+    }
+  }
+
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     _toastTimer?.cancel();
     super.dispose();
   }
@@ -418,26 +435,33 @@ class _HomePageState extends State<HomePage> {
     }
 
     // Responsive 2-column grid with 9:16 portrait aspect ratio
-    return GridView.builder(
-      padding: const EdgeInsets.only(left: 24, right: 24, top: 24, bottom: 100),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 24,
-        mainAxisSpacing: 24,
-        childAspectRatio: 9 / 16,
-      ),
-      itemCount: list.length,
-      itemBuilder: (context, index) => BrutalButton(
-        color: Colors.white,
-        shadowOffset: 6,
-        onTap: () => openWallpaper(list[index]),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            // Downsampled thumbnail image rendering to conserve memory in grid view
-            _buildResponsiveImage(list[index].thumbnailUrl,
-                cacheWidth: 300, fit: BoxFit.cover),
-          ],
+    return RefreshIndicator(
+      color: Colors.black,
+      backgroundColor: yellow,
+      onRefresh: () => AppState.of(context, listen: false).refreshWallpapers(),
+      child: GridView.builder(
+        controller: _scrollController,
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.only(left: 24, right: 24, top: 24, bottom: 100),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 24,
+          mainAxisSpacing: 24,
+          childAspectRatio: 9 / 16,
+        ),
+        itemCount: list.length,
+        itemBuilder: (context, index) => BrutalButton(
+          color: Colors.white,
+          shadowOffset: 6,
+          onTap: () => openWallpaper(list[index]),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Downsampled thumbnail image rendering to conserve memory in grid view
+              _buildResponsiveImage(list[index].thumbnailUrl,
+                  cacheWidth: 300, fit: BoxFit.cover),
+            ],
+          ),
         ),
       ),
     );

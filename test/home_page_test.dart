@@ -380,6 +380,89 @@ void main() {
 
     expect(find.text('STORAGE DETAILS'), findsNothing);
   });
+
+  testWidgets(
+      'HomePage wallpaper grid has RefreshIndicator with correct style and triggers refreshWallpapers',
+      (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final appState = _TestAppState();
+    await tester.runAsync(() async {
+      await appState.fetchWallpapers();
+    });
+
+    await tester.pumpWidget(buildTestWidget(appState));
+    await tester.pumpAndSettle();
+
+    // Verify RefreshIndicator properties
+    final refreshIndicatorFinder = find.byType(RefreshIndicator);
+    expect(refreshIndicatorFinder, findsOneWidget);
+    final refreshIndicator =
+        tester.widget<RefreshIndicator>(refreshIndicatorFinder);
+    expect(refreshIndicator.color, Colors.black);
+    expect(refreshIndicator.backgroundColor, const Color(0xFFFDE047));
+
+    // Verify GridView has AlwaysScrollableScrollPhysics and controller
+    final gridViewFinder = find.byType(GridView);
+    expect(gridViewFinder, findsOneWidget);
+    final gridView = tester.widget<GridView>(gridViewFinder);
+    expect(gridView.physics, isA<AlwaysScrollableScrollPhysics>());
+    expect(gridView.controller, isNotNull);
+
+    // Pull down to trigger refresh
+    await tester.fling(gridViewFinder, const Offset(0, 300), 1000);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(appState.refreshWallpapersCalled, isTrue);
+  });
+
+  testWidgets(
+      'HomePage wallpaper grid triggers loadMore when scrolled near bottom',
+      (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final appState = _TestAppState();
+    await tester.runAsync(() async {
+      await appState.fetchWallpapers();
+    });
+
+    await tester.pumpWidget(buildTestWidget(appState));
+    await tester.pumpAndSettle();
+
+    final gridViewFinder = find.byType(GridView);
+    final gridView = tester.widget<GridView>(gridViewFinder);
+    final controller = gridView.controller!;
+
+    // Scroll to near bottom (maxScrollExtent - 150 is within maxScrollExtent - 200)
+    final targetScroll = controller.position.maxScrollExtent - 150;
+    controller.jumpTo(targetScroll);
+    await tester.pumpAndSettle();
+
+    expect(appState.loadMoreCalled, isTrue);
+  });
 }
+
+class _TestAppState extends AppState {
+  bool loadMoreCalled = false;
+  bool refreshWallpapersCalled = false;
+
+  @override
+  Future<void> loadMore() async {
+    loadMoreCalled = true;
+  }
+
+  @override
+  Future<void> refreshWallpapers() async {
+    refreshWallpapersCalled = true;
+  }
+}
+
 
 
