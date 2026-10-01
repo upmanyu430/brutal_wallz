@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:brutal_wallz/globals/app_state.dart';
+import 'package:brutal_wallz/globals/themes.dart';
 import 'package:brutal_wallz/pages/home_page.dart';
 
 /// Widget tests for [HomePage] verifying wallpaper grid rendering,
@@ -29,8 +30,11 @@ void main() {
   Widget buildTestWidget(AppState appState) {
     return ChangeNotifierProvider<AppState>.value(
       value: appState,
-      child: const MaterialApp(
-        home: HomePage(),
+      child: Consumer<AppState>(
+        builder: (context, state, _) => MaterialApp(
+          theme: state.theme,
+          home: const HomePage(),
+        ),
       ),
     );
   }
@@ -276,5 +280,54 @@ void main() {
     expect(find.byIcon(Icons.remove_red_eye), findsOneWidget);
     expect(find.text('SET AS WALLPAPER'), findsOneWidget);
     expect(find.text('09:41'), findsNothing);
+  });
+
+  testWidgets(
+      'Dark Mode toggle in Settings switches theme between lightTheme and darkTheme and updates UI',
+      (WidgetTester tester) async {
+    final appState = await setupHomePageTest(tester);
+
+    // Initial state: theme is lightTheme, scaffold has lightTheme background
+    expect(appState.theme, lightTheme);
+    final scaffoldFinder = find.byType(Scaffold);
+    expect(scaffoldFinder, findsOneWidget);
+    Scaffold scaffold = tester.widget<Scaffold>(scaffoldFinder);
+    expect(scaffold.backgroundColor, lightTheme.scaffoldBackgroundColor);
+
+    // Navigate to Settings tab (index 2)
+    final settingsTabFinder = find.byIcon(Icons.settings);
+    expect(settingsTabFinder, findsOneWidget);
+    await tester.tap(settingsTabFinder);
+    await tester.pumpAndSettle();
+
+    // Verify Dark Mode toggle initial state
+    expect(find.text('SETTINGS'), findsOneWidget);
+    expect(find.text('Dark Mode'), findsOneWidget);
+    final darkModeFinder = find.widgetWithText(ListTile, 'Dark Mode');
+    expect(darkModeFinder, findsOneWidget);
+    expect(find.descendant(of: darkModeFinder, matching: find.text('Disabled')), findsOneWidget);
+    expect(find.descendant(of: darkModeFinder, matching: find.text('OFF')), findsOneWidget);
+
+    // Tap Dark Mode toggle to switch to darkTheme
+    await tester.tap(darkModeFinder);
+    await tester.pumpAndSettle();
+
+    // Verify theme changed to darkTheme in AppState and UI
+    expect(appState.theme, darkTheme);
+    expect(find.descendant(of: darkModeFinder, matching: find.text('Enabled')), findsOneWidget);
+    expect(find.descendant(of: darkModeFinder, matching: find.text('ON')), findsOneWidget);
+    scaffold = tester.widget<Scaffold>(scaffoldFinder);
+    expect(scaffold.backgroundColor, darkTheme.scaffoldBackgroundColor);
+
+    // Tap Dark Mode toggle again to switch back to lightTheme
+    await tester.tap(darkModeFinder);
+    await tester.pumpAndSettle();
+
+    // Verify theme changed back to lightTheme
+    expect(appState.theme, lightTheme);
+    expect(find.descendant(of: darkModeFinder, matching: find.text('Disabled')), findsOneWidget);
+    expect(find.descendant(of: darkModeFinder, matching: find.text('OFF')), findsOneWidget);
+    scaffold = tester.widget<Scaffold>(scaffoldFinder);
+    expect(scaffold.backgroundColor, lightTheme.scaffoldBackgroundColor);
   });
 }
