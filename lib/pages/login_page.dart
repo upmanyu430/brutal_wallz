@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:brutal_wallz/components/brutal_button.dart';
+import 'package:brutal_wallz/main.dart'; // For sharedPrefs
 
 /// Entry screen allowing users to explore as a guest, sign in with OAuth providers,
 /// or create a new Brutal Wallz account.
@@ -48,7 +49,10 @@ class _LoginPageState extends State<LoginPage> {
   // ─── Navigation & Action Handlers ───────────────────────────────────────────
 
   /// Navigates user into the application flow starting from the animated loading screen.
-  void _navigateHome() => context.go('/loading-page');
+  void _navigateHome() {
+    sharedPrefs.setBool('has_logged_in', true);
+    context.go('/loading-page');
+  }
 
   /// Handles user tapping the Google Sign-In button.
   void _onGoogleTap() {
