@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:nowa_runtime/nowa_runtime.dart';
 
 /// A custom neo-brutalist styled button featuring high-contrast borders,
 /// hard offset drop shadows (no blur), and physical translation animations upon interaction.
-@NowaGenerated()
 class BrutalButton extends StatefulWidget {
-  @NowaGenerated({'loader': 'auto-constructor'})
   const BrutalButton({
     super.key,
     required this.child,
@@ -44,7 +41,6 @@ class BrutalButton extends StatefulWidget {
   }
 }
 
-@NowaGenerated()
 class _BrutalButtonState extends State<BrutalButton> {
   /// Tracks whether the button is currently held down by the user.
   bool isPressed = false;

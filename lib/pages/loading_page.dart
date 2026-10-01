@@ -15,11 +15,11 @@ class LoadingPage extends StatefulWidget {
 class _LoadingPageState extends State<LoadingPage>
     with TickerProviderStateMixin {
   // ─── Brand colours (consistent with global palette) ──────────────────────────
-  static const Color bg     = Color(0xFFF4F0E6);
+  static const Color bg = Color(0xFFF4F0E6);
   static const Color yellow = Color(0xFFFDE047);
-  static const Color pink   = Color(0xFFF9A8D4);
-  static const Color blue   = Color(0xFF93C5FD);
-  static const Color green  = Color(0xFF86EFAC);
+  static const Color pink = Color(0xFFF9A8D4);
+  static const Color blue = Color(0xFF93C5FD);
+  static const Color green = Color(0xFF86EFAC);
   static const Color orange = Color(0xFFFDBA74);
 
   /// Total duration for the progress bar to complete loading (2.4 seconds).
@@ -27,7 +27,7 @@ class _LoadingPageState extends State<LoadingPage>
 
   // ─── Progress Bar Animation Controllers ──────────────────────────────────────
   late final AnimationController _progressCtrl;
-  late final Animation<double>   _progressAnim;
+  late final Animation<double> _progressAnim;
 
   // ─── Bouncing Dots Animation Controllers ─────────────────────────────────────
   // Three bouncing dots staggered by 200 ms each.
@@ -77,7 +77,8 @@ class _LoadingPageState extends State<LoadingPage>
       return Tween<double>(begin: 0, end: -14).animate(
         CurvedAnimation(
           parent: _dotCtrl,
-          curve: Interval(start, min(start + 0.5, 1.0), curve: Curves.easeInOut),
+          curve:
+              Interval(start, min(start + 0.5, 1.0), curve: Curves.easeInOut),
         ),
       );
     });
@@ -101,8 +102,6 @@ class _LoadingPageState extends State<LoadingPage>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
-
               const Spacer(),
 
               // ── Main bold headline ─────────────────────────────────────────
@@ -142,8 +141,7 @@ class _LoadingPageState extends State<LoadingPage>
                             height: 12,
                             decoration: BoxDecoration(
                               color: _barColors[_barColorIdx],
-                              border:
-                                  Border.all(color: Colors.black, width: 2),
+                              border: Border.all(color: Colors.black, width: 2),
                             ),
                           ),
                         );

@@ -7,7 +7,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:async_wallpaper/async_wallpaper.dart';
 import 'package:brutal_wallz/models/wallpaper_model.dart';
 import 'package:brutal_wallz/globals/app_state.dart';
-import 'package:nowa_runtime/nowa_runtime.dart';
 import 'package:brutal_wallz/components/brutal_button.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:gal/gal.dart';
@@ -18,9 +17,7 @@ import 'package:brutal_wallz/main.dart';
 /// Main screen of the Brutal Wallz application.
 /// Houses the wallpaper gallery, interactive search, favorites collection,
 /// settings dashboard, full-screen preview modal, and toast feedback alerts.
-@NowaGenerated()
 class HomePage extends StatefulWidget {
-  @NowaGenerated({'loader': 'auto-constructor'})
   const HomePage({super.key});
 
   @override
@@ -29,7 +26,6 @@ class HomePage extends StatefulWidget {
   }
 }
 
-@NowaGenerated()
 class _HomePageState extends State<HomePage> {
   // ─── Neo-brutalist Brand Color Palette ──────────────────────────────────────
   /// Off-white paper background tone
@@ -103,7 +99,8 @@ class _HomePageState extends State<HomePage> {
       final favString = sharedPrefs.getString('favorites');
       if (favString != null) {
         final List<dynamic> jsonList = jsonDecode(favString);
-        favorites = jsonList.map((json) => WallpaperModel.fromJson(json)).toList();
+        favorites =
+            jsonList.map((json) => WallpaperModel.fromJson(json)).toList();
       }
     } catch (e) {
       debugPrint('Error decoding favorites: $e');
@@ -168,7 +165,10 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final bool canPop = !isModalOpen && selectedWallpaper == null && _currentIndex == 0 && !_isApplyingWallpaper;
+    final bool canPop = !isModalOpen &&
+        selectedWallpaper == null &&
+        _currentIndex == 0 &&
+        !_isApplyingWallpaper;
     return PopScope(
       canPop: canPop,
       onPopInvokedWithResult: (bool didPop, dynamic result) {
@@ -199,7 +199,8 @@ class _HomePageState extends State<HomePage> {
               _buildCurrentPage(),
 
               // Persistent bottom navigation bar
-              Positioned(bottom: 0, left: 0, right: 0, child: _buildBottomNav()),
+              Positioned(
+                  bottom: 0, left: 0, right: 0, child: _buildBottomNav()),
 
               // Animated full-screen wallpaper inspection modal
               AnimatedPositioned(
@@ -222,41 +223,41 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
 
-            // Top notification banner / toast with spring ease animation
-            AnimatedPositioned(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeOutBack,
-              top: isToastVisible ? 20 : -100,
-              left: 20,
-              right: 20,
-              child: Material(
-                color: Colors.transparent,
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: yellow,
-                    border: Border.all(color: Colors.black, width: 4),
-                    boxShadow: const [
-                      BoxShadow(color: Colors.black, offset: Offset(4, 4)),
-                    ],
-                  ),
-                  child: Text(
-                    toastMessage,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
+              // Top notification banner / toast with spring ease animation
+              AnimatedPositioned(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeOutBack,
+                top: isToastVisible ? 20 : -100,
+                left: 20,
+                right: 20,
+                child: Material(
+                  color: Colors.transparent,
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: yellow,
+                      border: Border.all(color: Colors.black, width: 4),
+                      boxShadow: const [
+                        BoxShadow(color: Colors.black, offset: Offset(4, 4)),
+                      ],
+                    ),
+                    child: Text(
+                      toastMessage,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   /// Builds the top-level view corresponding to the currently selected bottom nav tab.
   Widget _buildCurrentPage() {
@@ -372,7 +373,8 @@ class _HomePageState extends State<HomePage> {
         placeholder: (context, url) => const Center(
           child: CircularProgressIndicator(color: Colors.black),
         ),
-        errorWidget: (context, url, error) => const Icon(Icons.broken_image, size: 50),
+        errorWidget: (context, url, error) =>
+            const Icon(Icons.broken_image, size: 50),
       );
     }
     return Image.asset(
@@ -563,7 +565,8 @@ class _HomePageState extends State<HomePage> {
                             child: BrutalButton(
                               color: green,
                               shadowOffset: 6,
-                              onTap: _isApplyingWallpaper ? () {} : setWallpaper,
+                              onTap:
+                                  _isApplyingWallpaper ? () {} : setWallpaper,
                               child: Center(
                                 child: Text(
                                   _isApplyingWallpaper
@@ -721,7 +724,8 @@ class _HomePageState extends State<HomePage> {
         favorites.add(wall);
       }
     });
-    sharedPrefs.setString('favorites', jsonEncode(favorites.map((e) => e.toJson()).toList()));
+    sharedPrefs.setString(
+        'favorites', jsonEncode(favorites.map((e) => e.toJson()).toList()));
   }
 
   /// Displays the temporary toast notification banner with a specified [message].
@@ -978,7 +982,9 @@ class _HomePageState extends State<HomePage> {
       // _resolveWallpaperFile handles both asset:// paths and http(s):// URLs,
       // writing remote images to the local cache and assets to a temp file.
       final localPath = await _resolveWallpaperFile(wall.imageUrl);
-      if (localPath == null) throw Exception('Could not resolve wallpaper file');
+      if (localPath == null) {
+        throw Exception('Could not resolve wallpaper file');
+      }
 
       await Gal.putImage(localPath);
 

@@ -1,18 +1,15 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:nowa_runtime/nowa_runtime.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:brutal_wallz/globals/app_state.dart';
 import 'package:brutal_wallz/globals/router.dart';
 
 /// Global instance of [SharedPreferences] used for persistent key-value storage.
-@NowaGenerated()
 late final SharedPreferences sharedPrefs;
 
 /// Application entry point.
 /// Initializes bindings, asynchronously prepares persistent storage preferences,
 /// and launches the root [MyApp] widget.
-@NowaGenerated()
 main() async {
   // Ensure Flutter engine bindings are initialized before accessing async platform channels.
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,9 +24,7 @@ main() async {
 /// Root widget of the Brutal Wallz application.
 /// Configures dependency injection via [MultiProvider], sets up app-wide themes,
 /// and connects the declarative [GoRouter] navigation system.
-@NowaGenerated({'visibleInNowa': false})
 class MyApp extends StatelessWidget {
-  @NowaGenerated({'loader': 'auto-constructor'})
   const MyApp({super.key});
 
   @override
