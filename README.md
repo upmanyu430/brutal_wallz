@@ -1,4 +1,4 @@
-# Brutal_Wallz
+# Brutal Wallz
 
 A new Flutter project.
 
