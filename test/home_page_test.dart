@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:brutal_wallz/globals/app_state.dart';
+import 'package:brutal_wallz/globals/themes.dart';
 import 'package:brutal_wallz/pages/home_page.dart';
 
 /// Widget tests for [HomePage] verifying wallpaper grid rendering,
@@ -300,6 +301,51 @@ void main() {
 
     final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
     expect(scaffold.backgroundColor, customBgColor);
+  });
+
+  testWidgets(
+      'HomePage settings displays Dark Mode toggle switch and toggles theme on tap',
+      (WidgetTester tester) async {
+    final appState = await setupHomePageTest(tester);
+
+    // Switch to Settings tab (tab index 2)
+    final settingsNavFinder = find.byIcon(Icons.settings);
+    expect(settingsNavFinder, findsOneWidget);
+    await tester.tap(settingsNavFinder);
+    await tester.pumpAndSettle();
+
+    // Verify Dark Mode row exists
+    expect(find.text('Dark Mode'), findsOneWidget);
+    expect(find.text('Light theme enabled'), findsOneWidget);
+
+    final switchFinder = find.byType(Switch);
+    expect(switchFinder, findsOneWidget);
+    expect(tester.widget<Switch>(switchFinder).value, isFalse);
+    expect(appState.theme, lightTheme);
+
+    // Tap the switch to toggle to dark mode
+    await tester.tap(switchFinder);
+    await tester.pumpAndSettle();
+
+    expect(appState.theme, darkTheme);
+    expect(tester.widget<Switch>(switchFinder).value, isTrue);
+    expect(find.text('Dark theme enabled'), findsOneWidget);
+
+    // Tap again to toggle back to light mode
+    await tester.tap(switchFinder);
+    await tester.pumpAndSettle();
+
+    expect(appState.theme, lightTheme);
+    expect(tester.widget<Switch>(switchFinder).value, isFalse);
+    expect(find.text('Light theme enabled'), findsOneWidget);
+
+    // Tap the row button directly to toggle to dark mode
+    await tester.tap(find.text('Dark Mode'));
+    await tester.pumpAndSettle();
+
+    expect(appState.theme, darkTheme);
+    expect(tester.widget<Switch>(switchFinder).value, isTrue);
+    expect(find.text('Dark theme enabled'), findsOneWidget);
   });
 }
 

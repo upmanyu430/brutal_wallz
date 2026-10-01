@@ -11,6 +11,7 @@ import 'package:nowa_runtime/nowa_runtime.dart';
 import 'package:brutal_wallz/components/brutal_button.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:gal/gal.dart';
+import 'package:brutal_wallz/globals/themes.dart';
 
 /// Main screen of the Brutal Wallz application.
 /// Houses the wallpaper gallery, interactive search, favorites collection,
@@ -1043,6 +1044,10 @@ class _HomePageState extends State<HomePage> {
   /// Builds the Settings page containing notifications, cache management,
   /// favorites reset, and about dialog triggers.
   Widget _buildSettingsPage() {
+    final appState = AppState.of(context);
+    final isDarkMode = appState.theme == darkTheme ||
+        appState.theme.brightness == Brightness.dark;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.only(left: 24, right: 24, top: 24, bottom: 120),
       child: Column(
@@ -1052,6 +1057,46 @@ class _HomePageState extends State<HomePage> {
           const Text(
             'SETTINGS',
             style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900),
+          ),
+          // Dark Mode toggle row
+          BrutalButton(
+            color: Colors.white,
+            shadowOffset: 4,
+            onTap: () {
+              final currentAppState = AppState.of(context, listen: false);
+              final isDark = currentAppState.theme == darkTheme ||
+                  currentAppState.theme.brightness == Brightness.dark;
+              currentAppState.changeTheme(isDark ? lightTheme : darkTheme);
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                title: const Text(
+                  'Dark Mode',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                subtitle: Text(
+                  isDarkMode ? 'Dark theme enabled' : 'Light theme enabled',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 12,
+                  ),
+                ),
+                trailing: Switch(
+                  value: isDarkMode,
+                  activeColor: Colors.black,
+                  activeTrackColor: green,
+                  inactiveThumbColor: Colors.black,
+                  inactiveTrackColor: Colors.grey[300],
+                  onChanged: (val) {
+                    AppState.of(context, listen: false).changeTheme(
+                      val ? darkTheme : lightTheme,
+                    );
+                  },
+                ),
+              ),
+            ),
           ),
           // Notifications preference toggle row
           BrutalButton(
