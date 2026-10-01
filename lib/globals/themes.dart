@@ -16,17 +16,22 @@ final ThemeData lightTheme = ThemeData(
 /// Pairs dark background tones with high-contrast monospace typography.
 final ThemeData darkTheme = ThemeData(
   colorScheme: const ColorScheme.dark(),
-  textTheme: _makeBold(GoogleFonts.ubuntuSansMonoTextTheme(ThemeData.dark().textTheme)),
+  textTheme: _makeBold(
+      GoogleFonts.ubuntuSansMonoTextTheme(ThemeData.dark().textTheme)),
 );
 
 TextTheme _makeBold(TextTheme textTheme) {
   return textTheme.copyWith(
     displayLarge: textTheme.displayLarge?.copyWith(fontWeight: FontWeight.bold),
-    displayMedium: textTheme.displayMedium?.copyWith(fontWeight: FontWeight.bold),
+    displayMedium:
+        textTheme.displayMedium?.copyWith(fontWeight: FontWeight.bold),
     displaySmall: textTheme.displaySmall?.copyWith(fontWeight: FontWeight.bold),
-    headlineLarge: textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.bold),
-    headlineMedium: textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
-    headlineSmall: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+    headlineLarge:
+        textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.bold),
+    headlineMedium:
+        textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+    headlineSmall:
+        textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
     titleLarge: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
     titleMedium: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
     titleSmall: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
@@ -38,4 +43,3 @@ TextTheme _makeBold(TextTheme textTheme) {
     labelSmall: textTheme.labelSmall?.copyWith(fontWeight: FontWeight.bold),
   );
 }
-

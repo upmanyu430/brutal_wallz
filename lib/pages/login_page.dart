@@ -102,14 +102,14 @@ class _LoginPageState extends State<LoginPage> {
         // Smooth slide transition between the landing screen and the create-account form
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),
-          transitionBuilder: (child, anim) =>
-              SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(1, 0),
-                  end: Offset.zero,
-                ).animate(CurvedAnimation(parent: anim, curve: Curves.easeOutCubic)),
-                child: child,
-              ),
+          transitionBuilder: (child, anim) => SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(1, 0),
+              end: Offset.zero,
+            ).animate(
+                CurvedAnimation(parent: anim, curve: Curves.easeOutCubic)),
+            child: child,
+          ),
           child: _showCreateForm ? _buildCreateForm() : _buildLanding(),
         ),
       ),
@@ -132,7 +132,8 @@ class _LoginPageState extends State<LoginPage> {
             child: GestureDetector(
               onTap: _navigateHome,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   border: Border.all(color: Colors.black, width: 3),
@@ -149,7 +150,6 @@ class _LoginPageState extends State<LoginPage> {
           ),
 
           const SizedBox(height: 36),
-
 
           // Bold title typography
           const Text(
@@ -275,7 +275,8 @@ class _LoginPageState extends State<LoginPage> {
               GestureDetector(
                 onTap: () => setState(() => _showCreateForm = false),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     border: Border.all(color: Colors.black, width: 3),
@@ -292,7 +293,8 @@ class _LoginPageState extends State<LoginPage> {
               GestureDetector(
                 onTap: _navigateHome,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     border: Border.all(color: Colors.black, width: 3),
@@ -405,7 +407,8 @@ class _LoginPageState extends State<LoginPage> {
             child: GestureDetector(
               onTap: () => setState(() => _showCreateForm = false),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: const BoxDecoration(
                   border: Border(
                     bottom: BorderSide(color: Colors.black, width: 2),
@@ -608,7 +611,7 @@ class _GooglePainter extends CustomPainter {
     canvas.drawArc(
       Rect.fromCircle(center: Offset(cx, cy), radius: r),
       -1.57, // -90 degrees
-      1.57,  //  90 degrees
+      1.57, //  90 degrees
       false,
       ringPaint,
     );
@@ -701,7 +704,8 @@ class _GitHubPainter extends CustomPainter {
     canvas.drawRRect(bodyRect, paint);
 
     // Contrasting cutout for face/eye region
-    final facePaint = Paint()..color = color == Colors.white ? Colors.black : Colors.white;
+    final facePaint = Paint()
+      ..color = color == Colors.white ? Colors.black : Colors.white;
     canvas.drawCircle(Offset(cx, cy - size.height * 0.04), r * 0.45, facePaint);
   }
 
