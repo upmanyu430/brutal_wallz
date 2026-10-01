@@ -112,14 +112,21 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final bool canPop = !isModalOpen && selectedWallpaper == null && _currentIndex == 0;
     return PopScope(
-      canPop: !isModalOpen,
+      canPop: canPop,
       onPopInvokedWithResult: (bool didPop, dynamic result) {
         if (didPop) return;
         if (isPreviewMode) {
           setState(() => isPreviewMode = false);
         } else if (isModalOpen) {
           closeWallpaper();
+        } else if (selectedWallpaper != null) {
+          // Modal closing animation is currently in flight; consume the back gesture
+          // so it does not inadvertently exit the app or pop the root navigator.
+          return;
+        } else if (_currentIndex != 0) {
+          setState(() => _currentIndex = 0);
         }
       },
       child: Scaffold(
@@ -150,7 +157,10 @@ class _HomePageState extends State<HomePage> {
                     });
                   }
                 },
-                child: _buildModal(),
+                child: IgnorePointer(
+                  ignoring: !isModalOpen,
+                  child: _buildModal(),
+                ),
               ),
 
             // Top notification banner / toast with spring ease animation
@@ -828,7 +838,9 @@ class _HomePageState extends State<HomePage> {
   /// - [AsyncWallpaper.LOCK_SCREEN]
   /// - [AsyncWallpaper.BOTH_SCREENS]
   Future<void> _applyWallpaper(int wallpaperLocation) async {
-    if (selectedWallpaper == null) return;
+    final currentWallpaper = selectedWallpaper;
+    if (currentWallpaper == null || _isApplyingWallpaper) return;
+    final wallpaperUrl = currentWallpaper.imageUrl;
 
     final label = wallpaperLocation == AsyncWallpaper.HOME_SCREEN
         ? 'HOME SCREEN'
@@ -854,8 +866,7 @@ class _HomePageState extends State<HomePage> {
 
     bool result = false;
     try {
-      final localFilePath =
-          await _resolveWallpaperFile(selectedWallpaper!.imageUrl);
+      final localFilePath = await _resolveWallpaperFile(wallpaperUrl);
       if (localFilePath != null) {
         result = await AsyncWallpaper.setWallpaperFromFile(
           filePath: localFilePath,
@@ -865,7 +876,7 @@ class _HomePageState extends State<HomePage> {
       } else {
         // Direct URL fallback if file resolution fails
         result = await AsyncWallpaper.setWallpaper(
-          url: selectedWallpaper!.imageUrl,
+          url: wallpaperUrl,
           wallpaperLocation: wallpaperLocation,
           goToHome: false,
         ).timeout(const Duration(seconds: 15), onTimeout: () => false);
