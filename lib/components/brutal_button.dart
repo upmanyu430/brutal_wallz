@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 /// A custom neo-brutalist styled button featuring high-contrast borders,
 /// hard offset drop shadows (no blur), and physical translation animations upon interaction.
@@ -52,7 +53,10 @@ class _BrutalButtonState extends State<BrutalButton> {
 
     return GestureDetector(
       // When tap starts, sink the button into its shadow
-      onTapDown: (_) => setState(() => isPressed = true),
+      onTapDown: (_) {
+        HapticFeedback.mediumImpact();
+        setState(() => isPressed = true);
+      },
       // When tap completes, reset position and fire the callback
       onTapUp: (_) {
         setState(() => isPressed = false);
