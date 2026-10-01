@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:brutal_wallz/globals/app_state.dart';
@@ -9,6 +11,19 @@ import 'package:brutal_wallz/pages/home_page.dart';
 /// and navigation between modal and main views.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUpAll(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      const MethodChannel('plugins.flutter.io/path_provider'),
+      (MethodCall methodCall) async => Directory.systemTemp.path,
+    );
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      const MethodChannel('async_wallpaper'),
+      (MethodCall methodCall) async => true,
+    );
+  });
 
   /// Helper function to wrap [HomePage] in required [ChangeNotifierProvider] and [MaterialApp].
   Widget buildTestWidget(AppState appState) {

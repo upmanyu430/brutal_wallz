@@ -112,7 +112,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final bool canPop = !isModalOpen && selectedWallpaper == null && _currentIndex == 0;
+    final bool canPop = !isModalOpen && selectedWallpaper == null && _currentIndex == 0 && !_isApplyingWallpaper;
     return PopScope(
       canPop: canPop,
       onPopInvokedWithResult: (bool didPop, dynamic result) {
@@ -124,6 +124,9 @@ class _HomePageState extends State<HomePage> {
         } else if (selectedWallpaper != null) {
           // Modal closing animation is currently in flight; consume the back gesture
           // so it does not inadvertently exit the app or pop the root navigator.
+          return;
+        } else if (_isApplyingWallpaper) {
+          showToast('APPLYING WALLPAPER, PLEASE WAIT…');
           return;
         } else if (_currentIndex != 0) {
           setState(() => _currentIndex = 0);
@@ -681,10 +684,18 @@ class _HomePageState extends State<HomePage> {
   /// Displays a bottom sheet to select where to apply the wallpaper.
   void setWallpaper() {
     HapticFeedback.heavyImpact();
+    bool optionSelected = false;
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (BuildContext context) {
+      builder: (BuildContext sheetContext) {
+        void selectOption(int location) {
+          if (optionSelected) return;
+          optionSelected = true;
+          Navigator.pop(sheetContext);
+          _applyWallpaper(location);
+        }
+
         return Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
@@ -711,10 +722,7 @@ class _HomePageState extends State<HomePage> {
                 child: BrutalButton(
                   color: yellow,
                   shadowOffset: 4,
-                  onTap: () {
-                    Navigator.pop(context);
-                    _applyWallpaper(AsyncWallpaper.HOME_SCREEN);
-                  },
+                  onTap: () => selectOption(AsyncWallpaper.HOME_SCREEN),
                   child: const Center(
                     child: Text(
                       'HOME SCREEN',
@@ -730,10 +738,7 @@ class _HomePageState extends State<HomePage> {
                 child: BrutalButton(
                   color: blue,
                   shadowOffset: 4,
-                  onTap: () {
-                    Navigator.pop(context);
-                    _applyWallpaper(AsyncWallpaper.LOCK_SCREEN);
-                  },
+                  onTap: () => selectOption(AsyncWallpaper.LOCK_SCREEN),
                   child: const Center(
                     child: Text(
                       'LOCK SCREEN',
@@ -749,10 +754,7 @@ class _HomePageState extends State<HomePage> {
                 child: BrutalButton(
                   color: green,
                   shadowOffset: 4,
-                  onTap: () {
-                    Navigator.pop(context);
-                    _applyWallpaper(AsyncWallpaper.BOTH_SCREENS);
-                  },
+                  onTap: () => selectOption(AsyncWallpaper.BOTH_SCREENS),
                   child: const Center(
                     child: Text(
                       'BOTH',
@@ -785,7 +787,7 @@ class _HomePageState extends State<HomePage> {
         final tempDir = await getTemporaryDirectory();
         final fileName = imagePath.split('/').last;
         final tempFile = File('${tempDir.path}/$fileName');
-        await tempFile.writeAsBytes(
+        tempFile.writeAsBytesSync(
           byteData.buffer.asUint8List(
             byteData.offsetInBytes,
             byteData.lengthInBytes,
@@ -810,7 +812,7 @@ class _HomePageState extends State<HomePage> {
         final tempDir = await getTemporaryDirectory();
         final fileName = imagePath.split('/').last;
         final tempFile = File('${tempDir.path}/$fileName');
-        await tempFile.writeAsBytes(
+        tempFile.writeAsBytesSync(
           byteData.buffer.asUint8List(
             byteData.offsetInBytes,
             byteData.lengthInBytes,
@@ -848,15 +850,9 @@ class _HomePageState extends State<HomePage> {
             ? 'LOCK SCREEN'
             : 'BOTH';
 
-    // In widget testing environment, simulate successful application toast
-    if (Platform.environment.containsKey('FLUTTER_TEST')) {
-      closeWallpaper();
-      showToast('APPLIED TO $label!');
-      return;
-    }
-
-    // async_wallpaper only sets wallpapers on Android; on other platforms it is unsupported.
-    if (!Platform.isAndroid) {
+    final isSupported =
+        Platform.isAndroid || Platform.environment.containsKey('FLUTTER_TEST');
+    if (!isSupported) {
       showToast('NOT SUPPORTED ON THIS PLATFORM');
       return;
     }
@@ -891,7 +887,10 @@ class _HomePageState extends State<HomePage> {
     if (!mounted) return;
 
     if (result) {
-      closeWallpaper();
+      // Only dismiss the modal if the user hasn't already switched to a different wallpaper
+      if (selectedWallpaper?.id == currentWallpaper.id) {
+        closeWallpaper();
+      }
     }
     showToast(result ? 'APPLIED TO $label!' : 'FAILED — TRY AGAIN');
   }
