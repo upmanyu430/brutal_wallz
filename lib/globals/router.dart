@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 import 'package:brutal_wallz/pages/home_page.dart';
 import 'package:brutal_wallz/pages/login_page.dart';
 import 'package:brutal_wallz/pages/loading_page.dart';
+import 'package:brutal_wallz/main.dart'; // For sharedPrefs
 import 'package:nowa_runtime/nowa_runtime.dart';
 
 /// Declarative router configuration powered by [GoRouter].
@@ -10,6 +11,13 @@ import 'package:nowa_runtime/nowa_runtime.dart';
 final GoRouter appRouter = GoRouter(
   // The initial entry route when the app launches (Login / Welcome page)
   initialLocation: '/login-page',
+  redirect: (context, state) {
+    final bool hasLoggedIn = sharedPrefs.getBool('has_logged_in') ?? false;
+    if (hasLoggedIn && state.matchedLocation == '/login-page') {
+      return '/home-page';
+    }
+    return null;
+  },
   routes: [
     // Welcome, social sign-in, and account creation screen
     GoRoute(
