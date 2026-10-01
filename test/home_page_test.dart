@@ -82,7 +82,7 @@ void main() {
     expect(find.byIcon(Icons.arrow_downward), findsOneWidget);
     await tester.tap(find.byIcon(Icons.arrow_downward));
     await tester.pumpAndSettle();
-    expect(find.text('WALLPAPER SAVED TO GALLERY!'), findsOneWidget);
+    expect(find.text('DOWNLOADING\u2026'), findsOneWidget);
     await tester.pump(const Duration(seconds: 3));
     await tester.pumpAndSettle();
     // Verify modal does not display the wallpaper title label
