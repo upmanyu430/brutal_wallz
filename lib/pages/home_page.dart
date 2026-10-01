@@ -1502,8 +1502,8 @@ class _HomePageState extends State<HomePage> {
           });
         },
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 20),
-          child: Icon(icon, size: 32, color: Colors.black),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: Icon(icon, size: 24, color: Colors.black),
         ),
       ),
     );
