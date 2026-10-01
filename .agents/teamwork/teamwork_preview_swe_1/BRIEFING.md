@@ -47,11 +47,12 @@ Orchestrate fixing the wallpaper navigation/state bug where setting a wallpaper 
 | Agent | Type | Work Item | Status | Conv ID |
 |-------|------|-----------|--------|---------|
 | implementer_1 | teamwork_preview_implementer | Fix navigation bug & write test | completed | 4d514cf4-88d1-49f7-82be-60223bd0d61f |
+| reviewer_1 | teamwork_preview_reviewer | Adversarial review round 1 | in-progress | 2653b13c-cce6-4eb5-82df-d4b1419e2b37 |
 
 ## Succession Status
 - Succession required: no
-- Spawn count: 1 / 16
-- Pending subagents: none
+- Spawn count: 2 / 16
+- Pending subagents: 2653b13c-cce6-4eb5-82df-d4b1419e2b37
 - Predecessor: none
 - Successor: not yet spawned
 
