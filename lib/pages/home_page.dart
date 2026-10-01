@@ -922,8 +922,11 @@ class _HomePageState extends State<HomePage> {
     showToast(result ? 'APPLIED TO $label!' : 'FAILED — TRY AGAIN');
   }
 
-  /// Downloads [selectedWallpaper]'s full-resolution image from the network
-  /// and saves it to the device's local photo gallery via [Gal].
+  /// Downloads [selectedWallpaper]'s image (asset or remote URL) and saves
+  /// it to the device's local photo gallery via [Gal].
+  ///
+  /// Delegates path resolution to [_resolveWallpaperFile], which handles both
+  /// local asset paths and HTTP URLs — the same helper used by [_applyWallpaper].
   Future<void> downloadWallpaper() async {
     final wall = selectedWallpaper;
     if (wall == null || _isDownloading) return;
@@ -932,12 +935,12 @@ class _HomePageState extends State<HomePage> {
     showToast('DOWNLOADING…');
 
     try {
-      // Re-use flutter_cache_manager (already a project dependency) to fetch
-      // the image bytes — respects cache so repeated taps don't re-download.
-      final file = await DefaultCacheManager().getSingleFile(wall.imageUrl);
-      final bytes = await file.readAsBytes();
+      // _resolveWallpaperFile handles both asset:// paths and http(s):// URLs,
+      // writing remote images to the local cache and assets to a temp file.
+      final localPath = await _resolveWallpaperFile(wall.imageUrl);
+      if (localPath == null) throw Exception('Could not resolve wallpaper file');
 
-      await Gal.putImageBytes(bytes, name: wall.title);
+      await Gal.putImage(localPath);
 
       if (mounted) showToast('SAVED TO GALLERY!');
     } on GalException catch (e) {
