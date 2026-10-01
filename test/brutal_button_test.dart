@@ -16,6 +16,8 @@ void main() {
         return null;
       },
     );
+    addTearDown(() => tester.binding.defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.platform, null));
 
     bool tapped = false;
     await tester.pumpWidget(
