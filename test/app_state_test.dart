@@ -45,5 +45,47 @@ void main() {
     await expectLater(state.loadMore(), completes);
     await expectLater(state.refreshWallpapers(), completes);
   });
+
+  test('loadMore increments currentPage and appends slice of wallpapers', () async {
+    final state = AppState();
+    await state.fetchWallpapers();
+    final initialCount = state.wallpapers.length;
+    expect(state.currentPage, 1);
+    expect(state.isFetchingMore, isFalse);
+
+    final future = state.loadMore();
+    expect(state.isFetchingMore, isTrue);
+    await future;
+
+    expect(state.isFetchingMore, isFalse);
+    expect(state.currentPage, 2);
+    expect(state.wallpapers.length, initialCount + 6);
+  });
+
+  test('loadMore short-circuits when isLoading or isFetchingMore is true', () async {
+    final state = AppState();
+    state.isLoading = true;
+    await state.loadMore();
+    expect(state.currentPage, 1);
+    expect(state.isFetchingMore, isFalse);
+  });
+
+  test('refreshWallpapers resets currentPage and reloads initial wallpapers', () async {
+    final state = AppState();
+    await state.fetchWallpapers();
+    final initialCount = state.wallpapers.length;
+
+    // Simulate paginated state
+    await state.loadMore();
+    expect(state.currentPage, 2);
+    expect(state.wallpapers.length, initialCount + 6);
+
+    // Refresh collection
+    await state.refreshWallpapers();
+    expect(state.currentPage, 1);
+    expect(state.wallpapers.length, initialCount);
+    expect(state.isLoading, isFalse);
+    expect(state.isFetchingMore, isFalse);
+  });
 }
 

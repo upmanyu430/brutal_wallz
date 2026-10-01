@@ -447,6 +447,42 @@ void main() {
 
     expect(appState.loadMoreCalled, isTrue);
   });
+
+  testWidgets(
+      'HomePage displays bottom loading indicator when isFetchingMore is true',
+      (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final appState = AppState();
+    await tester.runAsync(() async {
+      await appState.fetchWallpapers();
+    });
+
+    await tester.pumpWidget(buildTestWidget(appState));
+    await tester.pumpAndSettle();
+
+    // Verify bottom indicator is not present initially
+    expect(find.byKey(const Key('load_more_indicator')), findsNothing);
+
+    // Simulate loadMore state
+    appState.isFetchingMore = true;
+    appState.notifyListeners();
+    await tester.pump();
+
+    // Verify bottom loading indicator appears
+    expect(find.byKey(const Key('load_more_indicator')), findsOneWidget);
+
+    // Reset loadMore state
+    appState.isFetchingMore = false;
+    appState.notifyListeners();
+    await tester.pump();
+
+    // Verify bottom loading indicator disappears
+    expect(find.byKey(const Key('load_more_indicator')), findsNothing);
+  });
 }
 
 class _TestAppState extends AppState {

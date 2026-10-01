@@ -38,6 +38,12 @@ class AppState extends ChangeNotifier {
   /// Indicates whether wallpapers are actively being fetched or decoded.
   bool isLoading = false;
 
+  /// Indicates whether additional wallpapers are actively being fetched for pagination.
+  bool isFetchingMore = false;
+
+  /// Current pagination page counter.
+  int currentPage = 1;
+
   /// Holds an error description if the wallpaper fetching operation fails; otherwise null.
   String? error;
 
@@ -74,9 +80,30 @@ class AppState extends ChangeNotifier {
   }
 
   /// Loads more wallpapers for pagination.
-  Future<void> loadMore() async {}
+  Future<void> loadMore() async {
+    if (isFetchingMore || isLoading) return;
 
-  /// Refreshes wallpaper collection.
-  Future<void> refreshWallpapers() async {}
+    isFetchingMore = true;
+    notifyListeners();
+
+    try {
+      await Future.delayed(const Duration(milliseconds: 1500));
+      currentPage++;
+      wallpapers.addAll(wallpapers.take(6));
+    } finally {
+      isFetchingMore = false;
+      notifyListeners();
+    }
+  }
+
+  /// Refreshes wallpaper collection by resetting pagination and reloading bundled assets.
+  Future<void> refreshWallpapers() async {
+    if (isLoading || isFetchingMore) return;
+
+    currentPage = 1;
+    await Future.delayed(const Duration(milliseconds: 1500));
+    wallpapers.clear();
+    await fetchWallpapers();
+  }
 }
 

@@ -281,10 +281,21 @@ class _HomePageState extends State<HomePage> {
     switch (_currentIndex) {
       case 0:
         // Tab 0: Wallpaper Gallery with Search Header
+        final appState = AppState.of(context);
         return Column(
           children: [
             _buildHeader(),
             Expanded(child: _buildWallpaperGrid(filteredWallpapers)),
+            if (appState.isFetchingMore)
+              const Padding(
+                padding: EdgeInsets.only(top: 8, bottom: 80),
+                child: Center(
+                  child: CircularProgressIndicator(
+                    key: Key('load_more_indicator'),
+                    color: Colors.black,
+                  ),
+                ),
+              ),
           ],
         );
       case 1:
