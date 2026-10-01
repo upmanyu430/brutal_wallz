@@ -9,6 +9,7 @@ import 'package:brutal_wallz/models/wallpaper_model.dart';
 import 'package:brutal_wallz/globals/app_state.dart';
 import 'package:nowa_runtime/nowa_runtime.dart';
 import 'package:brutal_wallz/components/brutal_button.dart';
+import 'package:brutal_wallz/globals/themes.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:gal/gal.dart';
 
@@ -150,7 +151,7 @@ class _HomePageState extends State<HomePage> {
         }
       },
       child: Scaffold(
-        backgroundColor: bg,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: SafeArea(
           bottom: false,
           child: Stack(
@@ -1052,6 +1053,49 @@ class _HomePageState extends State<HomePage> {
           const Text(
             'SETTINGS',
             style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900),
+          ),
+          // Dark Mode toggle row
+          BrutalButton(
+            color: Colors.white,
+            shadowOffset: 4,
+            onTap: () {
+              final isDark = Theme.of(context).brightness == Brightness.dark;
+              AppState.of(context, listen: false).changeTheme(isDark ? lightTheme : darkTheme);
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                title: const Text(
+                  'Dark Mode',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                subtitle: Text(
+                  Theme.of(context).brightness == Brightness.dark ? 'Enabled' : 'Disabled',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 12,
+                  ),
+                ),
+                trailing: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).brightness == Brightness.dark ? green : Colors.grey[300],
+                    border: Border.all(color: Colors.black, width: 2),
+                  ),
+                  child: Text(
+                    Theme.of(context).brightness == Brightness.dark ? 'ON' : 'OFF',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
           // Notifications preference toggle row
           BrutalButton(
