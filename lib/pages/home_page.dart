@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'dart:io' show Platform, File;
+import 'dart:io' show Platform, File, Directory;
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:async_wallpaper/async_wallpaper.dart';
@@ -99,19 +99,20 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    final favString = sharedPrefs.getString('favorites');
-    if (favString != null) {
-      try {
+    try {
+      final favString = sharedPrefs.getString('favorites');
+      if (favString != null) {
         final List<dynamic> jsonList = jsonDecode(favString);
         favorites = jsonList.map((json) => WallpaperModel.fromJson(json)).toList();
-      } catch (e) {
-        debugPrint('Error decoding favorites: $e');
       }
+    } catch (e) {
+      debugPrint('Error decoding favorites: $e');
     }
     // Trigger wallpaper asset fetching after the initial widget frame is rendered
     WidgetsBinding.instance.addPostFrameCallback((_) {
       AppState.of(context, listen: false).fetchWallpapers();
     });
+    _calculateCacheSize();
   }
 
   @override
@@ -120,11 +121,37 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
+  /// Calculates the total size of cached network image assets in megabytes.
+  Future<void> _calculateCacheSize() async {
+    try {
+      final tempDir = await getTemporaryDirectory();
+      final cacheDir = Directory('${tempDir.path}/libCachedImageData');
+      int totalSize = 0;
+      if (await cacheDir.exists()) {
+        final files = cacheDir.listSync(recursive: true);
+        for (final file in files) {
+          if (file is File) {
+            try {
+              totalSize += await file.length();
+            } catch (_) {}
+          }
+        }
+      }
+      if (mounted) {
+        setState(() {
+          cacheSizeMb = totalSize / (1024 * 1024);
+        });
+      }
+    } catch (e) {
+      debugPrint('Error calculating cache size: $e');
+    }
+  }
+
   /// User preference toggle for push notifications
   bool notificationsEnabled = true;
 
-  /// Simulated cached asset storage size in megabytes
-  double cacheSizeMb = 14.8;
+  /// Cached asset storage size in megabytes
+  double cacheSizeMb = 0.0;
 
   /// Text displayed inside the animated toast banner
   String toastMessage = 'WALLPAPER APPLIED!';
@@ -1398,12 +1425,13 @@ class _HomePageState extends State<HomePage> {
                       child: BrutalButton(
                         color: yellow,
                         shadowOffset: 4,
-                        onTap: () {
+                        onTap: () async {
                           Navigator.of(ctx).pop();
-                          setState(() {
-                            cacheSizeMb = 0;
-                          });
-                          showToast('CACHE CLEARED!');
+                          await DefaultCacheManager().emptyCache();
+                          await _calculateCacheSize();
+                          if (mounted) {
+                            showToast('CACHE CLEARED!');
+                          }
                         },
                         child: const Center(
                           child: Padding(

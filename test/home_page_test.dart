@@ -347,5 +347,39 @@ void main() {
     expect(tester.widget<Switch>(switchFinder).value, isTrue);
     expect(find.text('Dark theme enabled'), findsOneWidget);
   });
+
+  testWidgets('HomePage settings displays calculated cache size',
+      (WidgetTester tester) async {
+    await setupHomePageTest(tester);
+
+    // Switch to Settings tab (tab index 2)
+    final settingsNavFinder = find.byIcon(Icons.settings);
+    expect(settingsNavFinder, findsOneWidget);
+    await tester.tap(settingsNavFinder);
+    await tester.pumpAndSettle();
+
+    // Verify Storage & Cache row is present with initial calculated cache size
+    expect(find.text('Storage & Cache'), findsOneWidget);
+    expect(find.text('Cache: 0.0 MB'), findsOneWidget);
+
+    // Tap Storage & Cache to open dialog
+    await tester.tap(find.text('Storage & Cache'));
+    await tester.pumpAndSettle();
+
+    // Verify Storage Details dialog displays current cache size
+    expect(find.text('STORAGE DETAILS'), findsOneWidget);
+    expect(
+      find.text('Current cached wallpapers and assets: 0.0 MB'),
+      findsOneWidget,
+    );
+
+    // Tap CLOSE to dismiss dialog
+    expect(find.text('CLOSE'), findsOneWidget);
+    await tester.tap(find.text('CLOSE'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('STORAGE DETAILS'), findsNothing);
+  });
 }
+
 
