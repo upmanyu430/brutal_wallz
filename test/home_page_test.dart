@@ -86,9 +86,14 @@ void main() {
     expect(find.text('DOWNLOADING\u2026'), findsOneWidget);
     await tester.pump(const Duration(seconds: 3));
     await tester.pumpAndSettle();
-    // Verify modal does not display the wallpaper title label
-    expect(
-        find.text(appState.wallpapers.first.title.toUpperCase()), findsNothing);
+    // Verify modal displays the wallpaper title label
+    final titleFinder = find.text(appState.wallpapers.first.title);
+    expect(titleFinder, findsOneWidget);
+    final titleWidget = tester.widget<Text>(titleFinder);
+    expect(titleWidget.textAlign, TextAlign.center);
+    expect(titleWidget.style?.fontSize, 24);
+    expect(titleWidget.style?.fontWeight, FontWeight.w900);
+    expect(titleWidget.style?.letterSpacing, 1.2);
 
     // 3. Verify Modal has InteractiveViewer with AssetImage
     final interactiveViewerFinder = find.byType(InteractiveViewer);

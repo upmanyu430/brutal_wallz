@@ -596,6 +596,15 @@ class _HomePageState extends State<HomePage> {
                   mainAxisSize: MainAxisSize.min,
                   spacing: 16,
                   children: [
+                    Text(
+                      wall.title,
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.2,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16,
