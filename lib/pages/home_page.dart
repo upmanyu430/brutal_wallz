@@ -1130,9 +1130,8 @@ class _HomePageState extends State<HomePage> {
                 ),
                 trailing: Switch(
                   value: isDarkMode,
-                  activeThumbColor: Colors.black,
+                  thumbColor: const WidgetStatePropertyAll<Color>(Colors.black),
                   activeTrackColor: green,
-                  inactiveThumbColor: Colors.black,
                   inactiveTrackColor: Colors.grey[300],
                   onChanged: (val) {
                     AppState.of(context, listen: false).changeTheme(
