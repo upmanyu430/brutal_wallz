@@ -10,6 +10,7 @@ import 'package:brutal_wallz/globals/app_state.dart';
 import 'package:nowa_runtime/nowa_runtime.dart';
 import 'package:brutal_wallz/components/brutal_button.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:gal/gal.dart';
 
 /// Main screen of the Brutal Wallz application.
 /// Houses the wallpaper gallery, interactive search, favorites collection,
@@ -70,6 +71,9 @@ class _HomePageState extends State<HomePage> {
 
   /// True while a wallpaper apply operation is in progress.
   bool _isApplyingWallpaper = false;
+
+  /// True while a wallpaper download-to-gallery operation is in progress.
+  bool _isDownloading = false;
 
   /// True while the wallpaper apply target selection bottom sheet is visible.
   bool _isBottomSheetOpen = false;
@@ -541,7 +545,7 @@ class _HomePageState extends State<HomePage> {
                           child: BrutalButton(
                             color: Colors.black,
                             shadowOffset: 6,
-                            onTap: downloadWallpaper,
+                            onTap: _isDownloading ? () {} : downloadWallpaper,
                             child: const Center(
                               child: Icon(
                                 Icons.arrow_downward,
@@ -918,9 +922,33 @@ class _HomePageState extends State<HomePage> {
     showToast(result ? 'APPLIED TO $label!' : 'FAILED — TRY AGAIN');
   }
 
-  /// Simulates downloading the high-resolution image to the device gallery.
-  void downloadWallpaper() {
-    showToast('WALLPAPER SAVED TO GALLERY!');
+  /// Downloads [selectedWallpaper]'s full-resolution image from the network
+  /// and saves it to the device's local photo gallery via [Gal].
+  Future<void> downloadWallpaper() async {
+    final wall = selectedWallpaper;
+    if (wall == null || _isDownloading) return;
+
+    setState(() => _isDownloading = true);
+    showToast('DOWNLOADING…');
+
+    try {
+      // Re-use flutter_cache_manager (already a project dependency) to fetch
+      // the image bytes — respects cache so repeated taps don't re-download.
+      final file = await DefaultCacheManager().getSingleFile(wall.imageUrl);
+      final bytes = await file.readAsBytes();
+
+      await Gal.putImageBytes(bytes, name: wall.title);
+
+      if (mounted) showToast('SAVED TO GALLERY!');
+    } on GalException catch (e) {
+      debugPrint('downloadWallpaper GalException: ${e.type}');
+      if (mounted) showToast('SAVE FAILED — ${e.type.message.toUpperCase()}');
+    } catch (e) {
+      debugPrint('downloadWallpaper error: $e');
+      if (mounted) showToast('SAVE FAILED — TRY AGAIN');
+    } finally {
+      if (mounted) setState(() => _isDownloading = false);
+    }
   }
 
   /// Opens the About dialog presenting version details and aesthetic info.
