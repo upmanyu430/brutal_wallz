@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:brutal_wallz/globals/app_state.dart';
 import 'package:brutal_wallz/globals/router.dart';
 import 'package:brutal_wallz/main.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:brutal_wallz/pages/home_page.dart';
 import 'package:brutal_wallz/pages/login_page.dart';
 
@@ -40,8 +42,46 @@ void main() {
   }
 
   group('Wallpaper Application & Navigation Resilience', () {
+    final List<MethodCall> asyncWallpaperCalls = [];
+    bool shouldAsyncWallpaperSucceed = true;
+
+    setUp(() {
+      asyncWallpaperCalls.clear();
+      shouldAsyncWallpaperSucceed = true;
+
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+        const MethodChannel('plugins.flutter.io/path_provider'),
+        (MethodCall methodCall) async {
+          return Directory.systemTemp.path;
+        },
+      );
+
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+        const MethodChannel('async_wallpaper'),
+        (MethodCall methodCall) async {
+          asyncWallpaperCalls.add(methodCall);
+          return shouldAsyncWallpaperSucceed;
+        },
+      );
+    });
+
+    tearDown(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+        const MethodChannel('plugins.flutter.io/path_provider'),
+        null,
+      );
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+        const MethodChannel('async_wallpaper'),
+        null,
+      );
+    });
+
     testWidgets(
-        'Tapping SET AS WALLPAPER opens bottom sheet, applies to HOME SCREEN, and pops back to previous gallery screen',
+        'Tapping SET AS WALLPAPER opens bottom sheet, applies to HOME SCREEN with goToHome=false, and pops back to previous gallery screen',
         (WidgetTester tester) async {
       await setupHomePageTest(tester);
 
@@ -64,6 +104,11 @@ void main() {
       await tester.tap(find.text('HOME SCREEN'));
       await tester.pumpAndSettle();
 
+      // Verify async_wallpaper was called with goToHome: false
+      expect(asyncWallpaperCalls.length, equals(1));
+      expect(asyncWallpaperCalls.first.method, equals('set_home_wallpaper_file'));
+      expect(asyncWallpaperCalls.first.arguments['goToHome'], isFalse);
+
       // Verify applied toast is visible and bottom sheet is closed
       expect(find.text('APPLIED TO HOME SCREEN!'), findsOneWidget);
       expect(find.text('APPLY TO:'), findsNothing);
@@ -80,7 +125,7 @@ void main() {
     });
 
     testWidgets(
-        'Lock Screen option applies wallpaper and pops back to previous gallery screen',
+        'Lock Screen option applies wallpaper with goToHome=false and pops back to previous gallery screen',
         (WidgetTester tester) async {
       await setupHomePageTest(tester);
 
@@ -92,6 +137,10 @@ void main() {
 
       await tester.tap(find.text('LOCK SCREEN'));
       await tester.pumpAndSettle();
+
+      expect(asyncWallpaperCalls.length, equals(1));
+      expect(asyncWallpaperCalls.first.method, equals('set_lock_wallpaper_file'));
+      expect(asyncWallpaperCalls.first.arguments['goToHome'], isFalse);
 
       expect(find.text('APPLIED TO LOCK SCREEN!'), findsOneWidget);
       expect(find.text('APPLY TO:'), findsNothing);
@@ -107,7 +156,7 @@ void main() {
     });
 
     testWidgets(
-        'Both option applies wallpaper and pops back to previous gallery screen',
+        'Both option applies wallpaper with goToHome=false and pops back to previous gallery screen',
         (WidgetTester tester) async {
       await setupHomePageTest(tester);
 
@@ -119,6 +168,10 @@ void main() {
 
       await tester.tap(find.text('BOTH'));
       await tester.pumpAndSettle();
+
+      expect(asyncWallpaperCalls.length, equals(1));
+      expect(asyncWallpaperCalls.first.method, equals('set_both_wallpaper_file'));
+      expect(asyncWallpaperCalls.first.arguments['goToHome'], isFalse);
 
       expect(find.text('APPLIED TO BOTH!'), findsOneWidget);
       expect(find.text('APPLY TO:'), findsNothing);
@@ -290,7 +343,9 @@ void main() {
       addTearDown(tester.view.resetDevicePixelRatio);
 
       SharedPreferences.setMockInitialValues({'has_logged_in': true});
-      sharedPrefs = await SharedPreferences.getInstance();
+      try {
+        sharedPrefs = await SharedPreferences.getInstance();
+      } catch (_) {}
 
       final appState = AppState();
       await tester.runAsync(() async {
@@ -332,6 +387,211 @@ void main() {
       // Settle toast dismiss timer
       await tester.pump(const Duration(seconds: 3));
       await tester.pumpAndSettle();
+    });
+
+    testWidgets(
+        'Rapid double tap on bottom sheet option does not pop HomePage or exit to LoginPage',
+        (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(800, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      SharedPreferences.setMockInitialValues({'has_logged_in': true});
+      try {
+        sharedPrefs = await SharedPreferences.getInstance();
+      } catch (_) {}
+
+      final appState = AppState();
+      await tester.runAsync(() async {
+        await appState.fetchWallpapers();
+      });
+
+      await tester.pumpWidget(
+        ChangeNotifierProvider<AppState>.value(
+          value: appState,
+          child: MaterialApp.router(
+            routerConfig: appRouter,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Open wallpaper modal
+      await tester.tap(find.byType(Image).first);
+      await tester.pumpAndSettle();
+
+      // Open bottom sheet
+      await tester.tap(find.text('SET AS WALLPAPER'));
+      await tester.pumpAndSettle();
+      expect(find.text('HOME SCREEN'), findsOneWidget);
+
+      // First tap on HOME SCREEN
+      await tester.tap(find.text('HOME SCREEN'));
+      // Advance 50ms into bottom sheet dismiss animation
+      await tester.pump(const Duration(milliseconds: 50));
+      // Second tap while bottom sheet is dismissing
+      await tester.tap(find.text('HOME SCREEN'), warnIfMissed: false);
+      await tester.pumpAndSettle();
+
+      // Verify HomePage is still active and app did NOT pop to LoginPage or exit
+      expect(find.byType(LoginPage), findsNothing);
+      expect(find.byType(HomePage), findsOneWidget);
+
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets(
+        'When wallpaper application fails, shows failure toast and modal remains open for retry',
+        (WidgetTester tester) async {
+      shouldAsyncWallpaperSucceed = false;
+      await setupHomePageTest(tester);
+
+      // Open first wallpaper modal
+      await tester.tap(find.byType(Image).first);
+      await tester.pumpAndSettle();
+      expect(find.text('SET AS WALLPAPER'), findsOneWidget);
+
+      // Tap SET AS WALLPAPER -> HOME SCREEN
+      await tester.tap(find.text('SET AS WALLPAPER'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('HOME SCREEN'));
+      await tester.pumpAndSettle();
+
+      // Verify failure toast is shown and modal stays open
+      expect(find.text('FAILED — TRY AGAIN'), findsOneWidget);
+      expect(find.text('SET AS WALLPAPER'), findsOneWidget);
+      expect(find.byType(HomePage), findsOneWidget);
+
+      // Verify button can be tapped again for retry
+      await tester.tap(find.text('SET AS WALLPAPER'));
+      await tester.pumpAndSettle();
+      expect(find.text('APPLY TO:'), findsOneWidget);
+
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets(
+        'System back gesture while wallpaper application is in flight does not exit the app',
+        (WidgetTester tester) async {
+      final applyCompleter = Completer<bool>();
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+        const MethodChannel('async_wallpaper'),
+        (MethodCall methodCall) async {
+          asyncWallpaperCalls.add(methodCall);
+          return await applyCompleter.future;
+        },
+      );
+
+      await setupHomePageTest(tester);
+
+      // Open first wallpaper modal
+      await tester.tap(find.byType(Image).first);
+      await tester.pumpAndSettle();
+
+      // Tap SET AS WALLPAPER -> HOME SCREEN
+      await tester.tap(find.text('SET AS WALLPAPER'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('HOME SCREEN'));
+      // Pump initial frame so _applyWallpaper starts and _isApplyingWallpaper is true
+      await tester.pump();
+
+      // Verify button and banner toast show APPLYING…
+      expect(find.text('APPLYING…'), findsNWidgets(2));
+
+      // First back press: closes modal back to gallery
+      final didPop1 = await tester.binding.handlePopRoute();
+      expect(didPop1, isTrue);
+      await tester.pumpAndSettle();
+
+      // Modal is now closed, user is back on gallery, but wallpaper is still applying
+      expect(find.text('SET AS WALLPAPER'), findsNothing);
+      expect(find.text('SEARCH AESTHETICS'), findsOneWidget);
+
+      // Second back press on gallery while wallpaper is applying:
+      // must NOT exit the app, but instead warn user to wait
+      final didPop2 = await tester.binding.handlePopRoute();
+      expect(didPop2, isTrue);
+      await tester.pump();
+
+      // Verify warning toast and HomePage is still active (did not exit)
+      expect(find.text('APPLYING WALLPAPER, PLEASE WAIT…'), findsOneWidget);
+      expect(find.byType(HomePage), findsOneWidget);
+
+      // Complete async wallpaper
+      applyCompleter.complete(true);
+      await tester.pumpAndSettle();
+
+      // Verify completed toast on gallery
+      expect(find.text('APPLIED TO HOME SCREEN!'), findsOneWidget);
+      expect(find.text('SET AS WALLPAPER'), findsNothing);
+      expect(find.byType(HomePage), findsOneWidget);
+
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets(
+        'Switching wallpapers while application is in flight does not dismiss the new wallpaper modal',
+        (WidgetTester tester) async {
+      final applyCompleter = Completer<bool>();
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+        const MethodChannel('async_wallpaper'),
+        (MethodCall methodCall) async {
+          asyncWallpaperCalls.add(methodCall);
+          return await applyCompleter.future;
+        },
+      );
+
+      await setupHomePageTest(tester);
+
+      // Open first wallpaper modal
+      await tester.tap(find.byType(Image).first);
+      await tester.pumpAndSettle();
+
+      // Start applying first wallpaper
+      await tester.tap(find.text('SET AS WALLPAPER'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('HOME SCREEN'));
+      await tester.pump();
+
+      // User closes first modal while applying
+      await tester.tap(find.byIcon(Icons.arrow_back));
+      await tester.pumpAndSettle();
+      expect(find.text('SET AS WALLPAPER'), findsNothing);
+
+      // User opens second wallpaper in gallery
+      final allImages = find.byType(Image);
+      await tester.tap(allImages.at(1));
+      await tester.pumpAndSettle();
+      // While previous wallpaper is still applying, new modal button reflects in-flight status
+      expect(find.text('APPLYING…'), findsWidgets);
+
+      // Now first wallpaper finishes applying
+      applyCompleter.complete(true);
+      await tester.pumpAndSettle();
+
+      // Second wallpaper modal should STILL be open and now re-enabled!
+      expect(find.text('SET AS WALLPAPER'), findsOneWidget);
+      expect(find.text('APPLIED TO HOME SCREEN!'), findsOneWidget);
+
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pumpAndSettle();
+    });
+
+    test('getTemporaryDirectory works with mock handler', () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        const MethodChannel('plugins.flutter.io/path_provider'),
+        (MethodCall methodCall) async {
+          return Directory.systemTemp.path;
+        },
+      );
+      final dir = await getTemporaryDirectory();
+      expect(dir.path, equals(Directory.systemTemp.path));
     });
 
     test('Local asset byte loading extracts correctly to temporary storage', () async {
