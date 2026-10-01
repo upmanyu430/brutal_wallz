@@ -1,9 +1,6 @@
-import 'package:nowa_runtime/nowa_runtime.dart';
-
 /// Data model representing a wallpaper item.
 /// Supports ingestion from both local asset datasets (`assets/wallpapers.json`)
 /// and remote Wallhaven API response structures.
-@NowaGenerated()
 class WallpaperModel {
   /// Constructs an immutable [WallpaperModel] instance.
   const WallpaperModel({

@@ -7,7 +7,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:async_wallpaper/async_wallpaper.dart';
 import 'package:brutal_wallz/models/wallpaper_model.dart';
 import 'package:brutal_wallz/globals/app_state.dart';
-import 'package:nowa_runtime/nowa_runtime.dart';
 import 'package:brutal_wallz/components/brutal_button.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:gal/gal.dart';
@@ -18,9 +17,7 @@ import 'package:brutal_wallz/main.dart';
 /// Main screen of the Brutal Wallz application.
 /// Houses the wallpaper gallery, interactive search, favorites collection,
 /// settings dashboard, full-screen preview modal, and toast feedback alerts.
-@NowaGenerated()
 class HomePage extends StatefulWidget {
-  @NowaGenerated({'loader': 'auto-constructor'})
   const HomePage({super.key});
 
   @override
@@ -29,7 +26,6 @@ class HomePage extends StatefulWidget {
   }
 }
 
-@NowaGenerated()
 class _HomePageState extends State<HomePage> {
   // ─── Neo-brutalist Brand Color Palette ──────────────────────────────────────
   /// Off-white paper background tone

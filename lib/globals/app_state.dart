@@ -3,12 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:brutal_wallz/globals/themes.dart';
 import 'package:brutal_wallz/models/wallpaper_model.dart';
-import 'package:nowa_runtime/nowa_runtime.dart';
 import 'package:provider/provider.dart';
 
 /// Global application state manager responsible for theme management,
 /// wallpaper asset loading, and notifying listeners of state updates.
-@NowaGenerated()
 class AppState extends ChangeNotifier {
   /// Default constructor for [AppState].
   AppState();
