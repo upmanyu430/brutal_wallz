@@ -12,7 +12,10 @@ final GoRouter appRouter = GoRouter(
   // The initial entry route when the app launches (Login / Welcome page)
   initialLocation: '/login-page',
   redirect: (context, state) {
-    final bool hasLoggedIn = sharedPrefs.getBool('has_logged_in') ?? false;
+    bool hasLoggedIn = false;
+    try {
+      hasLoggedIn = sharedPrefs.getBool('has_logged_in') ?? false;
+    } catch (_) {}
     if (hasLoggedIn && state.matchedLocation == '/login-page') {
       return '/home-page';
     }

@@ -112,29 +112,46 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    return Scaffold(
-      backgroundColor: bg,
-      body: SafeArea(
-        bottom: false,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            // Active tab page content (Gallery, Favorites, or Settings)
-            _buildCurrentPage(),
+    return PopScope(
+      canPop: !isModalOpen,
+      onPopInvokedWithResult: (bool didPop, dynamic result) {
+        if (didPop) return;
+        if (isPreviewMode) {
+          setState(() => isPreviewMode = false);
+        } else if (isModalOpen) {
+          closeWallpaper();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: bg,
+        body: SafeArea(
+          bottom: false,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Active tab page content (Gallery, Favorites, or Settings)
+              _buildCurrentPage(),
 
-            // Persistent bottom navigation bar
-            Positioned(bottom: 0, left: 0, right: 0, child: _buildBottomNav()),
+              // Persistent bottom navigation bar
+              Positioned(bottom: 0, left: 0, right: 0, child: _buildBottomNav()),
 
-            // Animated full-screen wallpaper inspection modal
-            AnimatedPositioned(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOutCubic,
-              top: isModalOpen ? 0 : size.height,
-              bottom: isModalOpen ? 0 : -size.height,
-              left: 0,
-              right: 0,
-              child: _buildModal(),
-            ),
+              // Animated full-screen wallpaper inspection modal
+              AnimatedPositioned(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOutCubic,
+                top: isModalOpen ? 0 : size.height,
+                bottom: isModalOpen ? 0 : -size.height,
+                left: 0,
+                right: 0,
+                onEnd: () {
+                  if (!isModalOpen && mounted) {
+                    setState(() {
+                      selectedWallpaper = null;
+                    });
+                  }
+                },
+                child: _buildModal(),
+              ),
 
             // Top notification banner / toast with spring ease animation
             AnimatedPositioned(
@@ -168,8 +185,9 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   /// Builds the top-level view corresponding to the currently selected bottom nav tab.
   Widget _buildCurrentPage() {
@@ -820,6 +838,7 @@ class _HomePageState extends State<HomePage> {
 
     // In widget testing environment, simulate successful application toast
     if (Platform.environment.containsKey('FLUTTER_TEST')) {
+      closeWallpaper();
       showToast('APPLIED TO $label!');
       return;
     }
@@ -860,6 +879,9 @@ class _HomePageState extends State<HomePage> {
 
     if (!mounted) return;
 
+    if (result) {
+      closeWallpaper();
+    }
     showToast(result ? 'APPLIED TO $label!' : 'FAILED — TRY AGAIN');
   }
 
