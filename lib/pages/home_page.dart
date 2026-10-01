@@ -1130,7 +1130,7 @@ class _HomePageState extends State<HomePage> {
                 ),
                 trailing: Switch(
                   value: isDarkMode,
-                  activeColor: Colors.black,
+                  activeThumbColor: Colors.black,
                   activeTrackColor: green,
                   inactiveThumbColor: Colors.black,
                   inactiveTrackColor: Colors.grey[300],
