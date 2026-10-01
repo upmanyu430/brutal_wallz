@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:io' show Platform, File;
@@ -70,6 +71,12 @@ class _HomePageState extends State<HomePage> {
   /// True while a wallpaper apply operation is in progress.
   bool _isApplyingWallpaper = false;
 
+  /// True while the wallpaper apply target selection bottom sheet is visible.
+  bool _isBottomSheetOpen = false;
+
+  /// Timer controlling the auto-dismissal of the animated toast notification banner.
+  Timer? _toastTimer;
+
   /// Returns wallpaper models matching the current [_searchQuery] filter
   /// by checking both the wallpaper title and category.
   List<WallpaperModel> get filteredWallpapers {
@@ -89,6 +96,12 @@ class _HomePageState extends State<HomePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       AppState.of(context, listen: false).fetchWallpapers();
     });
+  }
+
+  @override
+  void dispose() {
+    _toastTimer?.cancel();
+    super.dispose();
   }
 
   /// User preference toggle for push notifications
@@ -669,12 +682,13 @@ class _HomePageState extends State<HomePage> {
 
   /// Displays the temporary toast notification banner with a specified [message].
   void showToast(String message) {
+    _toastTimer?.cancel();
     setState(() {
       toastMessage = message;
       isToastVisible = true;
     });
     // Auto-dismiss the toast banner after 2 seconds
-    Future<void>.delayed(const Duration(seconds: 2), () {
+    _toastTimer = Timer(const Duration(seconds: 2), () {
       if (mounted) {
         setState(() => isToastVisible = false);
       }
@@ -683,6 +697,8 @@ class _HomePageState extends State<HomePage> {
 
   /// Displays a bottom sheet to select where to apply the wallpaper.
   void setWallpaper() {
+    if (_isBottomSheetOpen || _isApplyingWallpaper) return;
+    _isBottomSheetOpen = true;
     HapticFeedback.heavyImpact();
     bool optionSelected = false;
     showModalBottomSheet<void>(
@@ -692,7 +708,9 @@ class _HomePageState extends State<HomePage> {
         void selectOption(int location) {
           if (optionSelected) return;
           optionSelected = true;
-          Navigator.pop(sheetContext);
+          if (sheetContext.mounted && Navigator.canPop(sheetContext)) {
+            Navigator.pop(sheetContext);
+          }
           _applyWallpaper(location);
         }
 
@@ -769,7 +787,9 @@ class _HomePageState extends State<HomePage> {
           ),
         );
       },
-    );
+    ).whenComplete(() {
+      _isBottomSheetOpen = false;
+    });
   }
 
   /// Resolves [imagePath] into a local filesystem path accessible by native platform services.
@@ -869,13 +889,16 @@ class _HomePageState extends State<HomePage> {
           wallpaperLocation: wallpaperLocation,
           goToHome: false,
         ).timeout(const Duration(seconds: 15), onTimeout: () => false);
-      } else {
-        // Direct URL fallback if file resolution fails
+      } else if (wallpaperUrl.startsWith('http://') ||
+          wallpaperUrl.startsWith('https://')) {
+        // Direct URL fallback if remote image file caching fails
         result = await AsyncWallpaper.setWallpaper(
           url: wallpaperUrl,
           wallpaperLocation: wallpaperLocation,
           goToHome: false,
         ).timeout(const Duration(seconds: 15), onTimeout: () => false);
+      } else {
+        result = false;
       }
     } catch (e) {
       debugPrint('Error applying wallpaper: $e');
