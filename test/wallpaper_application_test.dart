@@ -155,6 +155,133 @@ void main() {
     });
 
     testWidgets(
+        'Rapid successive back presses while modal is closing do not exit the app',
+        (WidgetTester tester) async {
+      await setupHomePageTest(tester);
+
+      // Open first wallpaper modal
+      await tester.tap(find.byType(Image).first);
+      await tester.pumpAndSettle();
+      expect(find.text('SET AS WALLPAPER'), findsOneWidget);
+
+      // First back press: initiates modal closing
+      final firstPop = await tester.binding.handlePopRoute();
+      expect(firstPop, isTrue);
+
+      // Advance animation partially (100ms into 300ms closing slide)
+      await tester.pump(const Duration(milliseconds: 100));
+
+      // Second back press while closing animation is in flight:
+      final secondPop = await tester.binding.handlePopRoute();
+      expect(secondPop, isTrue);
+
+      // Let animation settle
+      await tester.pumpAndSettle();
+
+      // Verify gallery is still displayed and app did not exit
+      expect(find.text('SET AS WALLPAPER'), findsNothing);
+      expect(find.text('SEARCH AESTHETICS'), findsOneWidget);
+      expect(find.byType(HomePage), findsOneWidget);
+    });
+
+    testWidgets(
+        'Modal controls ignore hit tests and cannot be tapped while closing animation is in flight',
+        (WidgetTester tester) async {
+      await setupHomePageTest(tester);
+
+      // Open first wallpaper modal
+      await tester.tap(find.byType(Image).first);
+      await tester.pumpAndSettle();
+      expect(find.text('SET AS WALLPAPER'), findsOneWidget);
+
+      // Tap back button to initiate close
+      await tester.tap(find.byIcon(Icons.arrow_back));
+      // Pump 50ms into 300ms closing slide
+      await tester.pump(const Duration(milliseconds: 50));
+
+      // Attempt to tap SET AS WALLPAPER button while modal is sliding down
+      await tester.tap(find.text('SET AS WALLPAPER'), warnIfMissed: false);
+      await tester.pumpAndSettle();
+
+      // Bottom sheet should NOT have opened!
+      expect(find.text('APPLY TO:'), findsNothing);
+    });
+
+    testWidgets(
+        'System back gesture on non-primary tab returns to Gallery tab instead of exiting app',
+        (WidgetTester tester) async {
+      await setupHomePageTest(tester);
+
+      // Tap Favorites tab (index 1)
+      await tester.tap(find.byIcon(Icons.favorite));
+      await tester.pumpAndSettle();
+      expect(find.text('FAVORITES'), findsOneWidget);
+
+      // System back press
+      final didPop = await tester.binding.handlePopRoute();
+      expect(didPop, isTrue);
+      await tester.pumpAndSettle();
+
+      // Assert navigated back to Gallery tab
+      expect(find.text('SEARCH AESTHETICS'), findsOneWidget);
+      expect(find.text('FAVORITES'), findsNothing);
+    });
+
+    testWidgets(
+        'System back gesture on Settings tab returns to Gallery tab and subsequent back exits app',
+        (WidgetTester tester) async {
+      await setupHomePageTest(tester);
+
+      // Tap Settings tab (index 2)
+      await tester.tap(find.byIcon(Icons.settings));
+      await tester.pumpAndSettle();
+      expect(find.text('SETTINGS'), findsOneWidget);
+
+      // First back press: returns to Gallery
+      final didPop1 = await tester.binding.handlePopRoute();
+      expect(didPop1, isTrue);
+      await tester.pumpAndSettle();
+      expect(find.text('SEARCH AESTHETICS'), findsOneWidget);
+      expect(find.text('SETTINGS'), findsNothing);
+
+      // Second back press on Gallery with no modal: canPop is true (exits app)
+      final didPop2 = await tester.binding.handlePopRoute();
+      expect(didPop2, isFalse);
+    });
+
+    testWidgets(
+        'System back gesture in preview mode exits preview mode first, then next back closes modal',
+        (WidgetTester tester) async {
+      await setupHomePageTest(tester);
+
+      // Open first wallpaper modal
+      await tester.tap(find.byType(Image).first);
+      await tester.pumpAndSettle();
+      expect(find.text('SET AS WALLPAPER'), findsOneWidget);
+
+      // Enter preview mode
+      await tester.tap(find.byIcon(Icons.remove_red_eye));
+      await tester.pumpAndSettle();
+      expect(find.text('EXIT PREVIEW'), findsOneWidget);
+      expect(find.text('SET AS WALLPAPER'), findsNothing);
+
+      // First back gesture: exits preview mode, modal remains open
+      final didPop1 = await tester.binding.handlePopRoute();
+      expect(didPop1, isTrue);
+      await tester.pumpAndSettle();
+      expect(find.text('EXIT PREVIEW'), findsNothing);
+      expect(find.text('SET AS WALLPAPER'), findsOneWidget);
+
+      // Second back gesture: closes wallpaper modal cleanly
+      final didPop2 = await tester.binding.handlePopRoute();
+      expect(didPop2, isTrue);
+      await tester.pumpAndSettle();
+      expect(find.text('SET AS WALLPAPER'), findsNothing);
+      expect(find.text('SEARCH AESTHETICS'), findsOneWidget);
+      expect(find.byType(HomePage), findsOneWidget);
+    });
+
+    testWidgets(
         'Setting wallpaper in GoRouter app stack returns to HomePage and does not exit or reset to login',
         (WidgetTester tester) async {
       tester.view.physicalSize = const Size(800, 1200);
