@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:brutal_wallz/globals/app_state.dart';
 import 'package:brutal_wallz/globals/themes.dart';
 import 'package:brutal_wallz/pages/home_page.dart';
+import 'package:brutal_wallz/components/brutal_refresh_indicator.dart';
 
 /// Widget tests for [HomePage] verifying wallpaper grid rendering,
 /// image caching configuration, full-screen detail modal interactions,
@@ -402,13 +403,9 @@ void main() {
     await tester.pumpWidget(buildTestWidget(appState));
     await tester.pumpAndSettle();
 
-    // Verify RefreshIndicator properties
-    final refreshIndicatorFinder = find.byType(RefreshIndicator);
+    // Verify BrutalRefreshIndicator properties
+    final refreshIndicatorFinder = find.byType(BrutalRefreshIndicator);
     expect(refreshIndicatorFinder, findsOneWidget);
-    final refreshIndicator =
-        tester.widget<RefreshIndicator>(refreshIndicatorFinder);
-    expect(refreshIndicator.color, Colors.black);
-    expect(refreshIndicator.backgroundColor, const Color(0xFFFDE047));
 
     // Verify GridView has AlwaysScrollableScrollPhysics and controller
     final gridViewFinder = find.byType(GridView);

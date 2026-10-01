@@ -8,6 +8,7 @@ import 'package:async_wallpaper/async_wallpaper.dart';
 import 'package:brutal_wallz/models/wallpaper_model.dart';
 import 'package:brutal_wallz/globals/app_state.dart';
 import 'package:brutal_wallz/components/brutal_button.dart';
+import 'package:brutal_wallz/components/brutal_refresh_indicator.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:gal/gal.dart';
 import 'package:brutal_wallz/globals/themes.dart';
@@ -478,9 +479,7 @@ class _HomePageState extends State<HomePage> {
       );
     }
 
-    return RefreshIndicator(
-      color: Colors.black,
-      backgroundColor: yellow,
+    return BrutalRefreshIndicator(
       onRefresh: () => AppState.of(context, listen: false).refreshWallpapers(),
       child: content is GridView
           ? content

@@ -24,6 +24,7 @@ dependencies:
   gal: ^2.3.3
   async_wallpaper:
     path: packages/async_wallpaper
+  custom_refresh_indicator: ^4.0.2
 
 dev_dependencies:
   flutter_test:
