@@ -12,6 +12,8 @@ import 'package:brutal_wallz/components/brutal_button.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:gal/gal.dart';
 import 'package:brutal_wallz/globals/themes.dart';
+import 'dart:convert';
+import 'package:brutal_wallz/main.dart';
 
 /// Main screen of the Brutal Wallz application.
 /// Houses the wallpaper gallery, interactive search, favorites collection,
@@ -97,6 +99,15 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    final favString = sharedPrefs.getString('favorites');
+    if (favString != null) {
+      try {
+        final List<dynamic> jsonList = jsonDecode(favString);
+        favorites = jsonList.map((json) => WallpaperModel.fromJson(json)).toList();
+      } catch (e) {
+        debugPrint('Error decoding favorites: $e');
+      }
+    }
     // Trigger wallpaper asset fetching after the initial widget frame is rendered
     WidgetsBinding.instance.addPostFrameCallback((_) {
       AppState.of(context, listen: false).fetchWallpapers();
@@ -683,6 +694,7 @@ class _HomePageState extends State<HomePage> {
         favorites.add(wall);
       }
     });
+    sharedPrefs.setString('favorites', jsonEncode(favorites.map((e) => e.toJson()).toList()));
   }
 
   /// Displays the temporary toast notification banner with a specified [message].
@@ -1291,6 +1303,7 @@ class _HomePageState extends State<HomePage> {
                           setState(() {
                             favorites.clear();
                           });
+                          sharedPrefs.remove('favorites');
                           showToast('FAVORITES CLEARED!');
                         },
                         child: const Center(
