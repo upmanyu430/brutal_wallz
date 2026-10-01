@@ -1,0 +1,22 @@
+group 'com.codenameakshay.async_wallpaper'
+version '1.0'
+
+apply plugin: 'com.android.library'
+
+android {
+    namespace 'com.brutalwallz.async_wallpaper'
+    compileSdkVersion 34
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    defaultConfig {
+        minSdkVersion 24
+    }
+}
+
+dependencies {
+    implementation "com.squareup.picasso:picasso:2.71828"
+}
