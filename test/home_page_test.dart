@@ -277,4 +277,29 @@ void main() {
     expect(find.text('SET AS WALLPAPER'), findsOneWidget);
     expect(find.text('09:41'), findsNothing);
   });
+
+  testWidgets(
+      'HomePage Scaffold background color inherits from global Theme',
+      (WidgetTester tester) async {
+    const customBgColor = Color(0xFF123456);
+    final appState = AppState();
+    await tester.runAsync(() async {
+      await appState.fetchWallpapers();
+    });
+
+    await tester.pumpWidget(
+      ChangeNotifierProvider<AppState>.value(
+        value: appState,
+        child: MaterialApp(
+          theme: ThemeData(scaffoldBackgroundColor: customBgColor),
+          home: const HomePage(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
+    expect(scaffold.backgroundColor, customBgColor);
+  });
 }
+

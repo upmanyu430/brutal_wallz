@@ -150,7 +150,7 @@ class _HomePageState extends State<HomePage> {
         }
       },
       child: Scaffold(
-        backgroundColor: bg,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: SafeArea(
           bottom: false,
           child: Stack(
