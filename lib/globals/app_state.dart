@@ -89,7 +89,13 @@ class AppState extends ChangeNotifier {
     try {
       await Future.delayed(const Duration(milliseconds: 1500));
       currentPage++;
-      wallpapers.addAll(wallpapers.take(6));
+      wallpapers.addAll(wallpapers.take(6).map((e) => WallpaperModel(
+            id: '${e.id}_$currentPage',
+            title: e.title,
+            cat: e.cat,
+            imageUrl: e.imageUrl,
+            thumbnailUrl: e.thumbnailUrl,
+          )));
     } finally {
       isFetchingMore = false;
       notifyListeners();

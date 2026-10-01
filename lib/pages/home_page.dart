@@ -120,8 +120,8 @@ class _HomePageState extends State<HomePage> {
   /// Listener on [_scrollController] that triggers loading more wallpapers
   /// when the user scrolls near the bottom of the grid.
   void _onScroll() {
-    if (_scrollController.hasClients &&
-        _scrollController.position.pixels >=
+    if (!_scrollController.hasClients) return;
+    if (_scrollController.position.pixels >=
             _scrollController.position.maxScrollExtent - 200) {
       AppState.of(context, listen: false).loadMore();
     }
@@ -285,17 +285,27 @@ class _HomePageState extends State<HomePage> {
         return Column(
           children: [
             _buildHeader(),
-            Expanded(child: _buildWallpaperGrid(filteredWallpapers)),
-            if (appState.isFetchingMore)
-              const Padding(
-                padding: EdgeInsets.only(top: 8, bottom: 80),
-                child: Center(
-                  child: CircularProgressIndicator(
-                    key: Key('load_more_indicator'),
-                    color: Colors.black,
+            Expanded(
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: _buildWallpaperGrid(filteredWallpapers),
                   ),
-                ),
+                  if (appState.isFetchingMore)
+                    const Positioned(
+                      bottom: 80,
+                      left: 0,
+                      right: 0,
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          key: Key('load_more_indicator'),
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                ],
               ),
+            ),
           ],
         );
       case 1:
@@ -413,44 +423,35 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  /// Builds the 2-column scrollable grid of wallpaper cards.
-  /// Handles loading indicators, error feedback, and empty result placeholders.
   Widget _buildWallpaperGrid(List<WallpaperModel> list) {
     final appState = AppState.of(context);
 
+    Widget content;
+
     // Show spinner if wallpapers are still being fetched from asset bundle
-    if (appState.isLoading) {
-      return const Center(
+    if (appState.isLoading && list.isEmpty) {
+      content = const Center(
         child: CircularProgressIndicator(color: Colors.black),
       );
-    }
-
-    // Display error message if asset loading failed
-    if (appState.error != null) {
-      return Center(
+    } else if (appState.error != null && list.isEmpty) {
+      // Display error message if asset loading failed
+      content = Center(
         child: Text(
           appState.error!,
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
       );
-    }
-
-    // Empty state when filter yields no matches
-    if (list.isEmpty) {
-      return const Center(
+    } else if (list.isEmpty) {
+      // Empty state when filter yields no matches
+      content = const Center(
         child: Text(
           'NO WALLPAPERS FOUND',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
       );
-    }
-
-    // Responsive 2-column grid with 9:16 portrait aspect ratio
-    return RefreshIndicator(
-      color: Colors.black,
-      backgroundColor: yellow,
-      onRefresh: () => AppState.of(context, listen: false).refreshWallpapers(),
-      child: GridView.builder(
+    } else {
+      // Responsive 2-column grid with 9:16 portrait aspect ratio
+      content = GridView.builder(
         controller: _scrollController,
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.only(left: 24, right: 24, top: 24, bottom: 100),
@@ -474,7 +475,25 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
         ),
-      ),
+      );
+    }
+
+    return RefreshIndicator(
+      color: Colors.black,
+      backgroundColor: yellow,
+      onRefresh: () => AppState.of(context, listen: false).refreshWallpapers(),
+      child: content is GridView
+          ? content
+          : LayoutBuilder(builder: (context, constraints) {
+              return SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Container(
+                  height: constraints.maxHeight,
+                  alignment: Alignment.center,
+                  child: content,
+                ),
+              );
+            }),
     );
   }
 
