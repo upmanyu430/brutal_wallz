@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'dart:io' show Platform, File, Directory;
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:async_wallpaper/async_wallpaper.dart';
+import 'package:brutal_wallz/services/wallpaper_service.dart';
 import 'package:brutal_wallz/models/wallpaper_model.dart';
 import 'package:brutal_wallz/globals/app_state.dart';
 import 'package:brutal_wallz/components/brutal_button.dart';

@@ -22,8 +22,6 @@ dependencies:
   flutter_cache_manager: ^3.4.1
   path_provider: ^2.1.5
   gal: ^2.3.3
-  async_wallpaper:
-    path: packages/async_wallpaper
   custom_refresh_indicator: ^4.0.2
 
 dev_dependencies:
