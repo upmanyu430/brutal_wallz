@@ -6,12 +6,15 @@ class WallpaperService {
   static const MethodChannel _channel = MethodChannel('async_wallpaper');
 
   /// Target Home Screen wallpaper
+  // ignore: constant_identifier_names
   static const int HOME_SCREEN = 1;
 
   /// Target Lock Screen wallpaper
+  // ignore: constant_identifier_names
   static const int LOCK_SCREEN = 2;
 
   /// Target both Home and Lock Screen wallpapers
+  // ignore: constant_identifier_names
   static const int BOTH_SCREENS = 3;
 
   /// Sets device wallpaper from a local file path.
