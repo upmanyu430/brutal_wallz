@@ -379,7 +379,8 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        height: 60,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         decoration: BoxDecoration(
           color: isDarkMode ? const Color(0xFF202026) : Colors.white,
           border: Border.all(
@@ -391,6 +392,7 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Icon(
               Icons.search,
@@ -398,12 +400,14 @@ class _HomePageState extends State<HomePage> {
             ),
             Expanded(
               child: TextField(
+                textAlignVertical: TextAlignVertical.center,
                 onChanged: (val) {
                   setState(() {
                     _searchQuery = val;
                   });
                 },
                 decoration: InputDecoration(
+                  isDense: true,
                   hintText: 'SEARCH AESTHETICS',
                   hintStyle: TextStyle(
                     fontWeight: FontWeight.bold,
