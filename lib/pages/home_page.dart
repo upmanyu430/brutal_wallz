@@ -216,9 +216,10 @@ class _HomePageState extends State<HomePage> {
               // Active tab page content (Gallery, Favorites, or Settings)
               _buildCurrentPage(),
 
-              // Persistent bottom navigation bar
-              Positioned(
-                  bottom: 0, left: 0, right: 0, child: _buildBottomNav()),
+              // Persistent bottom navigation bar (hidden when on-screen keyboard is active)
+              if (MediaQuery.viewInsetsOf(context).bottom == 0)
+                Positioned(
+                    bottom: 0, left: 0, right: 0, child: _buildBottomNav()),
 
               // Animated full-screen wallpaper inspection modal
               AnimatedPositioned(

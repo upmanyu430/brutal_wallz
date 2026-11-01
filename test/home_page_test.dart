@@ -485,6 +485,36 @@ void main() {
     // Verify bottom loading indicator disappears
     expect(find.byKey(const Key('load_more_indicator')), findsNothing);
   });
+
+  testWidgets(
+      'HomePage hides bottom navigation buttons when on-screen keyboard is open',
+      (WidgetTester tester) async {
+    await setupHomePageTest(tester);
+
+    // Initial state: bottom navigation buttons are visible
+    expect(find.byIcon(Icons.home), findsOneWidget);
+    expect(find.byIcon(Icons.favorite), findsOneWidget);
+    expect(find.byIcon(Icons.settings), findsOneWidget);
+
+    // Simulate on-screen keyboard opening
+    tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+    addTearDown(tester.view.resetViewInsets);
+    await tester.pump();
+
+    // Bottom navigation buttons should be hidden while keyboard is active
+    expect(find.byIcon(Icons.home), findsNothing);
+    expect(find.byIcon(Icons.favorite), findsNothing);
+    expect(find.byIcon(Icons.settings), findsNothing);
+
+    // Simulate keyboard dismissing
+    tester.view.resetViewInsets();
+    await tester.pump();
+
+    // Bottom navigation buttons should reappear
+    expect(find.byIcon(Icons.home), findsOneWidget);
+    expect(find.byIcon(Icons.favorite), findsOneWidget);
+    expect(find.byIcon(Icons.settings), findsOneWidget);
+  });
 }
 
 class _TestAppState extends AppState {
