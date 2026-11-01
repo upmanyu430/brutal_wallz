@@ -15,7 +15,13 @@ final ThemeData lightTheme = ThemeData(
 /// Neo-brutalist dark theme configuration.
 /// Pairs dark background tones with high-contrast monospace typography.
 final ThemeData darkTheme = ThemeData(
-  colorScheme: const ColorScheme.dark(),
+  scaffoldBackgroundColor: const Color(0xFF121214),
+  colorScheme: const ColorScheme.dark(
+    surface: Color(0xFF1E1E24),
+    primary: Color(0xFFFACC15),
+    secondary: Color(0xFF4ADE80),
+  ),
+  cardColor: const Color(0xFF1E1E24),
   textTheme: _makeBold(
       GoogleFonts.ubuntuSansMonoTextTheme(ThemeData.dark().textTheme)),
 );

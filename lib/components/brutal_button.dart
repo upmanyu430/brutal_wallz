@@ -13,6 +13,8 @@ class BrutalButton extends StatefulWidget {
     this.decoration,
     this.isActive = false,
     this.borderWidth = 4.0,
+    this.borderColor,
+    this.shadowColor,
   });
 
   /// The widget content rendered inside the button (e.g. text or icon).
@@ -35,6 +37,12 @@ class BrutalButton extends StatefulWidget {
 
   /// Width of the solid black border surrounding the button.
   final double borderWidth;
+
+  /// Optional border color override (defaults to [Colors.black]).
+  final Color? borderColor;
+
+  /// Optional shadow color override (defaults to [Colors.black]).
+  final Color? shadowColor;
 
   @override
   State<BrutalButton> createState() {
@@ -74,10 +82,13 @@ class _BrutalButtonState extends State<BrutalButton> {
         ),
         decoration: (widget.decoration ?? const BoxDecoration()).copyWith(
           color: widget.decoration == null ? widget.color : null,
-          border: Border.all(color: Colors.black, width: widget.borderWidth),
+          border: Border.all(
+            color: widget.borderColor ?? Colors.black,
+            width: widget.borderWidth,
+          ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black,
+              color: widget.shadowColor ?? Colors.black,
               // Shadow collapses to zero offset when pressed as button translates into it
               offset: active
                   ? Offset.zero

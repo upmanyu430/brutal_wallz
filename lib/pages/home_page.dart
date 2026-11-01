@@ -47,6 +47,9 @@ class _HomePageState extends State<HomePage> {
   /// Warm orange accent color
   final Color orange = const Color(0xFFFDBA74);
 
+  /// Punchy red accent color
+  final Color red = const Color(0xFFF87171);
+
   // ─── UI Overlay States ──────────────────────────────────────────────────────
   /// Controls the visibility of the slide-up full-screen wallpaper detail modal
   bool isModalOpen = false;
@@ -266,6 +269,7 @@ class _HomePageState extends State<HomePage> {
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
+                        color: Colors.black,
                       ),
                     ),
                   ),
@@ -312,29 +316,40 @@ class _HomePageState extends State<HomePage> {
         );
       case 1:
         // Tab 1: Saved Favorites Collection
+        final isDarkModeFav = Theme.of(context).brightness == Brightness.dark;
         return Column(
           children: [
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(24),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 border: Border(
-                  bottom: BorderSide(color: Colors.black, width: 4),
+                  bottom: BorderSide(
+                    color: isDarkModeFav ? const Color(0xFF27272A) : Colors.black,
+                    width: 4,
+                  ),
                 ),
               ),
-              child: const Text(
+              child: Text(
                 'FAVORITES',
-                style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900),
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w900,
+                  color: isDarkModeFav ? Colors.white : Colors.black,
+                ),
               ),
             ),
             Expanded(
               child: favorites.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Text(
                         'NO FAVORITES YET',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
+                          color: isDarkModeFav
+                              ? const Color(0xFFA1A1AA)
+                              : Colors.black87,
                         ),
                       ),
                     )
@@ -352,23 +367,35 @@ class _HomePageState extends State<HomePage> {
 
   /// Builds the neo-brutalist header container featuring an interactive search input.
   Widget _buildHeader() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.black, width: 4)),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: isDarkMode ? const Color(0xFF27272A) : Colors.black,
+            width: 4,
+          ),
+        ),
       ),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(color: Colors.black, width: 4),
+          color: isDarkMode ? const Color(0xFF202026) : Colors.white,
+          border: Border.all(
+            color: isDarkMode ? Colors.white : Colors.black,
+            width: 4,
+          ),
           boxShadow: const [
             BoxShadow(color: Colors.black, offset: Offset(4, 4)),
           ],
         ),
         child: Row(
           children: [
-            const Icon(Icons.search, color: Colors.black),
+            Icon(
+              Icons.search,
+              color: isDarkMode ? Colors.white : Colors.black,
+            ),
             Expanded(
               child: TextField(
                 onChanged: (val) {
@@ -376,16 +403,19 @@ class _HomePageState extends State<HomePage> {
                     _searchQuery = val;
                   });
                 },
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'SEARCH AESTHETICS',
                   hintStyle: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: Colors.grey,
+                    color: isDarkMode ? const Color(0xFFA1A1AA) : Colors.grey,
                   ),
                   border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12),
                 ),
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: isDarkMode ? Colors.white : Colors.black,
+                ),
               ),
             ),
             // Show clear button when query is present
@@ -396,7 +426,10 @@ class _HomePageState extends State<HomePage> {
                     _searchQuery = '';
                   });
                 },
-                child: const Icon(Icons.close, color: Colors.black),
+                child: Icon(
+                  Icons.close,
+                  color: isDarkMode ? Colors.white : Colors.black,
+                ),
               ),
           ],
         ),
@@ -504,6 +537,7 @@ class _HomePageState extends State<HomePage> {
     }
     final wall = selectedWallpaper!;
     final isFav = favorites.any((f) => f.id == wall.id);
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Material(
       color: Colors.black,
@@ -539,10 +573,11 @@ class _HomePageState extends State<HomePage> {
                       width: 50,
                       height: 50,
                       child: BrutalButton(
-                        color: Colors.white,
+                        color: isDarkMode ? const Color(0xFF202026) : Colors.white,
+                        borderColor: isDarkMode ? Colors.white : Colors.black,
                         shadowOffset: 4,
                         onTap: closeWallpaper,
-                        child: const Icon(Icons.arrow_back),
+                        child: Icon(Icons.arrow_back, color: isDarkMode ? Colors.white : Colors.black),
                       ),
                     ),
                     Row(
@@ -553,10 +588,11 @@ class _HomePageState extends State<HomePage> {
                           width: 50,
                           height: 50,
                           child: BrutalButton(
-                            color: Colors.white,
+                            color: isDarkMode ? const Color(0xFF202026) : Colors.white,
+                            borderColor: isDarkMode ? Colors.white : Colors.black,
                             shadowOffset: 4,
                             onTap: () => setState(() => isPreviewMode = true),
-                            child: const Icon(Icons.remove_red_eye),
+                            child: Icon(Icons.remove_red_eye, color: isDarkMode ? Colors.white : Colors.black),
                           ),
                         ),
                         // Existing Favorite button
@@ -564,11 +600,13 @@ class _HomePageState extends State<HomePage> {
                           width: 50,
                           height: 50,
                           child: BrutalButton(
-                            color: isFav ? pink : Colors.white,
+                            color: isFav ? pink : (isDarkMode ? const Color(0xFF202026) : Colors.white),
+                            borderColor: isDarkMode && !isFav ? Colors.white : Colors.black,
                             shadowOffset: 4,
                             onTap: () => toggleFavorite(wall),
                             child: Icon(
                               isFav ? Icons.favorite : Icons.favorite_border,
+                              color: isFav ? Colors.black : (isDarkMode ? Colors.white : Colors.black),
                             ),
                           ),
                         ),
@@ -587,10 +625,14 @@ class _HomePageState extends State<HomePage> {
               child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(24),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  border:
-                      Border(top: BorderSide(color: Colors.black, width: 8)),
+                decoration: BoxDecoration(
+                  color: isDarkMode ? const Color(0xFF1E1E24) : Colors.white,
+                  border: Border(
+                    top: BorderSide(
+                      color: isDarkMode ? Colors.white : Colors.black,
+                      width: isDarkMode ? 4 : 8,
+                    ),
+                  ),
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -598,10 +640,11 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     Text(
                       wall.title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w900,
                         letterSpacing: 1.2,
+                        color: isDarkMode ? Colors.white : Colors.black,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -616,7 +659,10 @@ class _HomePageState extends State<HomePage> {
                       ),
                       child: Text(
                         wall.cat,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
                       ),
                     ),
                     Row(
@@ -638,6 +684,7 @@ class _HomePageState extends State<HomePage> {
                                   style: const TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w900,
+                                    color: Colors.black,
                                   ),
                                 ),
                               ),
@@ -648,13 +695,13 @@ class _HomePageState extends State<HomePage> {
                           width: 60,
                           height: 60,
                           child: BrutalButton(
-                            color: Colors.black,
+                            color: isDarkMode ? Colors.white : Colors.black,
                             shadowOffset: 6,
                             onTap: _isDownloading ? () {} : downloadWallpaper,
-                            child: const Center(
+                            child: Center(
                               child: Icon(
                                 Icons.arrow_downward,
-                                color: Colors.white,
+                                color: isDarkMode ? Colors.black : Colors.white,
                                 size: 28,
                               ),
                             ),
@@ -679,13 +726,17 @@ class _HomePageState extends State<HomePage> {
                   height: 50,
                   width: 200,
                   child: BrutalButton(
-                    color: Colors.white,
+                    color: isDarkMode ? const Color(0xFF202026) : Colors.white,
+                    borderColor: isDarkMode ? Colors.white : Colors.black,
                     shadowOffset: 4,
                     onTap: () => setState(() => isPreviewMode = false),
-                    child: const Center(
+                    child: Center(
                       child: Text(
                         'EXIT PREVIEW',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: isDarkMode ? Colors.white : Colors.black,
+                        ),
                       ),
                     ),
                   ),
@@ -825,23 +876,28 @@ class _HomePageState extends State<HomePage> {
           _applyWallpaper(location);
         }
 
+        final isDarkModeSheet = Theme.of(sheetContext).brightness == Brightness.dark;
         return Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: bg,
-            border: const Border(
-              top: BorderSide(color: Colors.black, width: 4),
+            color: isDarkModeSheet ? const Color(0xFF1E1E24) : bg,
+            border: Border(
+              top: BorderSide(
+                color: isDarkModeSheet ? Colors.white : Colors.black,
+                width: 4,
+              ),
             ),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
+              Text(
                 'APPLY TO:',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w900,
+                  color: isDarkModeSheet ? Colors.white : Colors.black,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -855,8 +911,11 @@ class _HomePageState extends State<HomePage> {
                   child: const Center(
                     child: Text(
                       'HOME SCREEN',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
                     ),
                   ),
                 ),
@@ -871,8 +930,11 @@ class _HomePageState extends State<HomePage> {
                   child: const Center(
                     child: Text(
                       'LOCK SCREEN',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
                     ),
                   ),
                 ),
@@ -1065,6 +1127,7 @@ class _HomePageState extends State<HomePage> {
 
   /// Opens the About dialog presenting version details and aesthetic info.
   void _showAboutDialog() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     showDialog<void>(
       context: context,
       builder: (ctx) => Dialog(
@@ -1072,8 +1135,11 @@ class _HomePageState extends State<HomePage> {
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: Colors.black, width: 4),
+            color: isDarkMode ? const Color(0xFF202026) : Colors.white,
+            border: Border.all(
+              color: isDarkMode ? Colors.white : Colors.black,
+              width: 4,
+            ),
             boxShadow: const [
               BoxShadow(color: Colors.black, offset: Offset(6, 6)),
             ],
@@ -1086,9 +1152,13 @@ class _HomePageState extends State<HomePage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'ABOUT',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -1104,25 +1174,39 @@ class _HomePageState extends State<HomePage> {
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
+                        color: Colors.black,
                       ),
                     ),
                   ),
                 ],
               ),
-              const Text(
+              Text(
                 'Brutal Wallz delivers high-voltage, neo-brutalist wallpaper aesthetics for bold setups.',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  color: isDarkMode ? const Color(0xFFA1A1AA) : Colors.black87,
+                ),
               ),
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: blue.withValues(alpha: 0.3),
-                  border: Border.all(color: Colors.black, width: 2),
+                  color: isDarkMode
+                      ? blue.withValues(alpha: 0.15)
+                      : blue.withValues(alpha: 0.3),
+                  border: Border.all(
+                    color: isDarkMode ? blue : Colors.black,
+                    width: 2,
+                  ),
                 ),
-                child: const Text(
+                child: Text(
                   'Curated geometric patterns, halftone gradients, and retro-futuristic visuals.',
-                  style: TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 12,
+                    color: isDarkMode ? Colors.white : Colors.black,
+                  ),
                 ),
               ),
               SizedBox(
@@ -1136,7 +1220,10 @@ class _HomePageState extends State<HomePage> {
                     child: Center(
                       child: Text(
                         'GOT IT',
-                        style: TextStyle(fontWeight: FontWeight.w900),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w900,
+                          color: Colors.black,
+                        ),
                       ),
                     ),
                   ),
@@ -1156,19 +1243,30 @@ class _HomePageState extends State<HomePage> {
     final isDarkMode = appState.theme == darkTheme ||
         appState.theme.brightness == Brightness.dark;
 
+    final cardColor = isDarkMode ? const Color(0xFF202026) : Colors.white;
+    final cardBorderColor = isDarkMode ? Colors.white : Colors.black;
+    final titleColor = isDarkMode ? Colors.white : Colors.black;
+    final subtitleColor = isDarkMode ? const Color(0xFFA1A1AA) : Colors.black87;
+    final iconColor = isDarkMode ? Colors.white : Colors.black;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.only(left: 24, right: 24, top: 24, bottom: 120),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         spacing: 16,
         children: [
-          const Text(
+          Text(
             'SETTINGS',
-            style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900),
+            style: TextStyle(
+              fontSize: 32,
+              fontWeight: FontWeight.w900,
+              color: isDarkMode ? Colors.white : Colors.black,
+            ),
           ),
           // Dark Mode toggle row
           BrutalButton(
-            color: Colors.white,
+            color: cardColor,
+            borderColor: cardBorderColor,
             shadowOffset: 4,
             onTap: () {
               final currentAppState = AppState.of(context, listen: false);
@@ -1180,22 +1278,27 @@ class _HomePageState extends State<HomePage> {
               padding: const EdgeInsets.symmetric(horizontal: 4),
               child: ListTile(
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                title: const Text(
+                title: Text(
                   'Dark Mode',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: titleColor,
+                  ),
                 ),
                 subtitle: Text(
                   isDarkMode ? 'Dark theme enabled' : 'Light theme enabled',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w500,
                     fontSize: 12,
+                    color: subtitleColor,
                   ),
                 ),
                 trailing: Switch(
                   value: isDarkMode,
                   thumbColor: const WidgetStatePropertyAll<Color>(Colors.black),
                   activeTrackColor: green,
-                  inactiveTrackColor: Colors.grey[300],
+                  inactiveTrackColor:
+                      isDarkMode ? const Color(0xFF3F3F46) : Colors.grey[300],
                   onChanged: (val) {
                     AppState.of(context, listen: false).changeTheme(
                       val ? darkTheme : lightTheme,
@@ -1207,7 +1310,8 @@ class _HomePageState extends State<HomePage> {
           ),
           // Notifications preference toggle row
           BrutalButton(
-            color: Colors.white,
+            color: cardColor,
+            borderColor: cardBorderColor,
             shadowOffset: 4,
             onTap: () {
               setState(() {
@@ -1223,15 +1327,19 @@ class _HomePageState extends State<HomePage> {
               padding: const EdgeInsets.symmetric(horizontal: 4),
               child: ListTile(
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                title: const Text(
+                title: Text(
                   'Notifications',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: titleColor,
+                  ),
                 ),
                 subtitle: Text(
                   notificationsEnabled ? 'Enabled • Daily drops' : 'Disabled',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w500,
                     fontSize: 12,
+                    color: subtitleColor,
                   ),
                 ),
                 trailing: Container(
@@ -1240,14 +1348,26 @@ class _HomePageState extends State<HomePage> {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: notificationsEnabled ? green : Colors.grey[300],
-                    border: Border.all(color: Colors.black, width: 2),
+                    color: notificationsEnabled
+                        ? green
+                        : (isDarkMode
+                            ? const Color(0xFF3F3F46)
+                            : Colors.grey[300]),
+                    border: Border.all(
+                      color: isDarkMode && !notificationsEnabled
+                          ? Colors.white
+                          : Colors.black,
+                      width: 2,
+                    ),
                   ),
                   child: Text(
                     notificationsEnabled ? 'ON' : 'OFF',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w900,
                       fontSize: 12,
+                      color: notificationsEnabled || !isDarkMode
+                          ? Colors.black
+                          : Colors.white,
                     ),
                   ),
                 ),
@@ -1256,31 +1376,37 @@ class _HomePageState extends State<HomePage> {
           ),
           // Storage and cache details action row
           BrutalButton(
-            color: Colors.white,
+            color: cardColor,
+            borderColor: cardBorderColor,
             shadowOffset: 4,
             onTap: _showStorageDialog,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
               child: ListTile(
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                title: const Text(
+                title: Text(
                   'Storage & Cache',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: titleColor,
+                  ),
                 ),
                 subtitle: Text(
                   'Cache: ${cacheSizeMb.toStringAsFixed(1)} MB',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w500,
                     fontSize: 12,
+                    color: subtitleColor,
                   ),
                 ),
-                trailing: const Icon(Icons.storage, color: Colors.black),
+                trailing: Icon(Icons.storage, color: iconColor),
               ),
             ),
           ),
           // Clear favorites action row
           BrutalButton(
-            color: Colors.white,
+            color: cardColor,
+            borderColor: cardBorderColor,
             shadowOffset: 4,
             onTap: () {
               if (favorites.isEmpty) {
@@ -1289,40 +1415,63 @@ class _HomePageState extends State<HomePage> {
               }
               _showClearFavoritesDialog();
             },
-            child: const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 4),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
               child: ListTile(
-                contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                 title: Text(
                   'Clear Favorites',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: titleColor,
+                  ),
                 ),
                 subtitle: Text(
                   'Remove all saved wallpapers',
-                  style: TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 12,
+                    color: subtitleColor,
+                  ),
                 ),
-                trailing: Icon(Icons.delete_outline, color: Colors.black),
+                trailing: Icon(
+                  Icons.delete_outline,
+                  color: isDarkMode ? red : Colors.black,
+                ),
               ),
             ),
           ),
           // About application action row
           BrutalButton(
-            color: orange,
+            color: isDarkMode ? const Color(0xFF26201A) : orange,
+            borderColor: isDarkMode ? orange : Colors.black,
             shadowOffset: 4,
             onTap: _showAboutDialog,
-            child: const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 4),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
               child: ListTile(
-                contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                 title: Text(
                   'About Brutal Wallz',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: isDarkMode ? orange : Colors.black,
+                  ),
                 ),
                 subtitle: Text(
                   'Version, credits and info',
-                  style: TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 12,
+                    color: isDarkMode
+                        ? const Color(0xFFFDBA74).withValues(alpha: 0.85)
+                        : Colors.black87,
+                  ),
                 ),
-                trailing: Icon(Icons.info_outline, color: Colors.black),
+                trailing: Icon(
+                  Icons.info_outline,
+                  color: isDarkMode ? orange : Colors.black,
+                ),
               ),
             ),
           ),
@@ -1333,6 +1482,7 @@ class _HomePageState extends State<HomePage> {
 
   /// Displays confirmation dialog to empty all wallpapers from the user's favorites list.
   void _showClearFavoritesDialog() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     showDialog<void>(
       context: context,
       builder: (ctx) => Dialog(
@@ -1340,8 +1490,11 @@ class _HomePageState extends State<HomePage> {
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: Colors.black, width: 4),
+            color: isDarkMode ? const Color(0xFF202026) : Colors.white,
+            border: Border.all(
+              color: isDarkMode ? Colors.white : Colors.black,
+              width: 4,
+            ),
             boxShadow: const [
               BoxShadow(color: Colors.black, offset: Offset(6, 6)),
             ],
@@ -1351,13 +1504,21 @@ class _HomePageState extends State<HomePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             spacing: 16,
             children: [
-              const Text(
+              Text(
                 'CLEAR ALL FAVORITES?',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900),
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w900,
+                  color: isDarkMode ? Colors.white : Colors.black,
+                ),
               ),
-              const Text(
+              Text(
                 'Are you sure you want to delete all saved wallpapers from your favorites? This action cannot be undone.',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  color: isDarkMode ? const Color(0xFFA1A1AA) : Colors.black87,
+                ),
               ),
               Row(
                 spacing: 12,
@@ -1366,12 +1527,13 @@ class _HomePageState extends State<HomePage> {
                     child: SizedBox(
                       height: 48,
                       child: BrutalButton(
-                        color: Colors.white,
+                        color: isDarkMode ? const Color(0xFF33333A) : Colors.white,
+                        borderColor: isDarkMode ? Colors.white54 : Colors.black,
                         shadowOffset: 4,
                         onTap: () => Navigator.of(ctx).pop(),
-                        child: const Center(
+                        child: Center(
                           child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
                             child: FittedBox(
                               fit: BoxFit.scaleDown,
                               child: Text(
@@ -1379,6 +1541,7 @@ class _HomePageState extends State<HomePage> {
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 13,
+                                  color: isDarkMode ? Colors.white : Colors.black,
                                 ),
                               ),
                             ),
@@ -1411,6 +1574,7 @@ class _HomePageState extends State<HomePage> {
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 13,
+                                  color: Colors.black,
                                 ),
                               ),
                             ),
@@ -1430,6 +1594,7 @@ class _HomePageState extends State<HomePage> {
 
   /// Displays storage management dialog with option to clear cached data.
   void _showStorageDialog() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     showDialog<void>(
       context: context,
       builder: (ctx) => Dialog(
@@ -1437,8 +1602,11 @@ class _HomePageState extends State<HomePage> {
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: Colors.black, width: 4),
+            color: isDarkMode ? const Color(0xFF202026) : Colors.white,
+            border: Border.all(
+              color: isDarkMode ? Colors.white : Colors.black,
+              width: 4,
+            ),
             boxShadow: const [
               BoxShadow(color: Colors.black, offset: Offset(6, 6)),
             ],
@@ -1448,15 +1616,20 @@ class _HomePageState extends State<HomePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             spacing: 16,
             children: [
-              const Text(
+              Text(
                 'STORAGE DETAILS',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900),
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w900,
+                  color: isDarkMode ? Colors.white : Colors.black,
+                ),
               ),
               Text(
                 'Current cached wallpapers and assets: ${cacheSizeMb.toStringAsFixed(1)} MB',
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 14,
+                  color: isDarkMode ? const Color(0xFFA1A1AA) : Colors.black87,
                 ),
               ),
               Row(
@@ -1466,12 +1639,13 @@ class _HomePageState extends State<HomePage> {
                     child: SizedBox(
                       height: 48,
                       child: BrutalButton(
-                        color: Colors.white,
+                        color: isDarkMode ? const Color(0xFF33333A) : Colors.white,
+                        borderColor: isDarkMode ? Colors.white54 : Colors.black,
                         shadowOffset: 4,
                         onTap: () => Navigator.of(ctx).pop(),
-                        child: const Center(
+                        child: Center(
                           child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
                             child: FittedBox(
                               fit: BoxFit.scaleDown,
                               child: Text(
@@ -1479,6 +1653,7 @@ class _HomePageState extends State<HomePage> {
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 13,
+                                  color: isDarkMode ? Colors.white : Colors.black,
                                 ),
                               ),
                             ),
@@ -1511,6 +1686,7 @@ class _HomePageState extends State<HomePage> {
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 13,
+                                  color: Colors.black,
                                 ),
                               ),
                             ),
@@ -1530,8 +1706,17 @@ class _HomePageState extends State<HomePage> {
 
   /// Builds the persistent neo-brutalist bottom navigation bar container.
   Widget _buildBottomNav() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      color: Colors.black,
+      decoration: BoxDecoration(
+        color: Colors.black,
+        border: Border(
+          top: BorderSide(
+            color: isDarkMode ? const Color(0xFF27272A) : Colors.black,
+            width: 2,
+          ),
+        ),
+      ),
       child: SafeArea(
         top: false,
         child: Padding(
